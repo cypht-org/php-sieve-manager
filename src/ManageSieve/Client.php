@@ -4,6 +4,7 @@ namespace PhpSieveManager\ManageSieve;
 
 use PhpSieveManager\Exceptions\ResponseException;
 use PhpSieveManager\Exceptions\LiteralException;
+use PhpSieveManager\Exceptions\SieveException;
 use PhpSieveManager\Exceptions\SocketException;
 use PhpSieveManager\ManageSieve\Interfaces\SieveClient;
 use PhpSieveManager\Utils\StringUtils;
@@ -11,8 +12,9 @@ use PhpSieveManager\Utils\StringUtils;
 /**
  * ManageSieve Client
  */
-class Client extends SieveClient
+class Client implements SieveClient
 {
+    const SUPPORTED_AUTH_MECHS = ["DIGEST-MD5", "PLAIN", "LOGIN"];
     const KNOWN_CAPABILITIES = ["IMPLEMENTATION", "SASL", "SIEVE", "STARTTLS", "NOTIFY", "LANGUAGE", "VERSION"];
 
     private $readSize = 4096;
@@ -25,7 +27,7 @@ class Client extends SieveClient
     private $port;
     private $debug;
     private $sock;
-    private $authenticated;
+    private $authenticated = false;
     private $errorCode;
     private $connected = false;
 
@@ -35,6 +37,8 @@ class Client extends SieveClient
     private $activeExpression;
 
     /**
+     * Constructor
+     *
      * @param $addr
      * @param $port
      * @param $debug
@@ -47,6 +51,8 @@ class Client extends SieveClient
     }
 
     /**
+     * Init regex expressions variables
+     *
      * @return void
      */
     private function initExpressions() {
@@ -58,6 +64,7 @@ class Client extends SieveClient
 
     /**
      * Read line from the server
+     *
      * @return false|string
      * @throws SocketException
      * @throws LiteralException
@@ -96,7 +103,7 @@ class Client extends SieveClient
 
             preg_match($this->respCodeExpression, $return, $matches);
             if ($matches) {
-                if (strstr($matches[0], "NOTIFY")) {
+                if (strpos($matches[0], "NOTIFY") !== false) {
                     return $return;
                 }
                 switch ($matches[1]) {
@@ -146,6 +153,9 @@ class Client extends SieveClient
     }
 
     /**
+     * Get last error message retrieved from
+     * the server.
+     *
      * @return mixed
      */
     public function getErrorMessage() {
@@ -180,6 +190,8 @@ class Client extends SieveClient
     }
 
     /**
+     * LOGOUT
+     *
      * @return void
      * @throws LiteralException
      * @throws ResponseException
@@ -190,6 +202,8 @@ class Client extends SieveClient
     }
 
     /**
+     * CAPABILITY
+     *
      * @return string|null
      * @throws LiteralException
      * @throws ResponseException
@@ -204,6 +218,8 @@ class Client extends SieveClient
     }
 
     /**
+     * Read server response line per line
+     *
      * @param int $num_lines
      * @return array
      * @throws LiteralException
@@ -249,6 +265,12 @@ class Client extends SieveClient
         ];
     }
 
+    /**
+     * Debug messages if debug is enabled
+     *
+     * @param $message
+     * @return void
+     */
     private function debugPrint($message) {
         if ($this->debug) {
             echo ("[DEBUG][".date("Y-m-d H:i:s")."] " . $message. "\n");
@@ -301,6 +323,39 @@ class Client extends SieveClient
         ];
     }
 
+    public function getSASLMechanism() {
+
+    }
+
+    /**
+     * Authenticate to server
+     *
+     * @param $username
+     * @param $password
+     * @param $authz_id
+     * @param $auth_mechanism
+     * @return void
+     * @throws SieveException
+     */
+    private function authenticate($username, $password, $authz_id="", $auth_mechanism=null) {
+         if(!array_key_exists("SASL", $this->capabilities)) {
+             throw new SieveException("SASL not supported");
+         }
+         $server_mechanisms = $this->getSASLMechanism();
+
+         $mech_list = $this::SUPPORTED_AUTH_MECHS;
+         if ($auth_mechanism != null && in_array($auth_mechanism, $this::SUPPORTED_AUTH_MECHS)) {
+             $mech_list = [$auth_mechanism];
+         }
+
+         foreach ($mech_list as $mech) {
+             if (!in_array($mech, $server_mechanisms)) {
+                 continue;
+             }
+             $mech = str_replace(strtolower($mech), "-", "_");
+         }
+    }
+
     /**
      * Format script before send to server
      *
@@ -331,6 +386,8 @@ class Client extends SieveClient
     }
 
     /**
+     * Get server capabilities
+     *
      * @return bool
      * @throws LiteralException
      * @throws ResponseException
@@ -356,6 +413,8 @@ class Client extends SieveClient
     }
 
     /**
+     * Get capabilities array
+     *
      * @return mixed
      */
     public function getCapabilities() {
@@ -363,13 +422,15 @@ class Client extends SieveClient
     }
 
     /**
+     * Connect to ManageSieve Protocol
+     *
      * @param string $username
      * @param string $password
      * @param bool $tls
      * @return void
      * @throws LiteralException
      * @throws ResponseException
-     * @throws SocketException
+     * @throws SocketException|SieveException
      */
     public function connect($username="", $password="", $tls=false) {
         if (($this->sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP)) === false) {
@@ -384,6 +445,8 @@ class Client extends SieveClient
         if (!$this->getCapabilitiesFromServer()) {
             throw new SocketException("Failed to read capabilities from the server");
         }
+
+        $this->authenticate($username, $password);
     }
 
     /**
@@ -393,6 +456,10 @@ class Client extends SieveClient
         socket_close($this->sock);
     }
 
+    /**
+     * Make sure the socket is closed when
+     * the object is freed
+     */
     public function __destruct()
     {
         if ($this->connected) {
