@@ -308,7 +308,7 @@ class Client implements SieveClient
             }
         }
         $response_payload = $this->readResponse($numLines);
-
+        print_r($response_payload);
         if ($withResponse) {
             return [
                 "code" => $response_payload["code"],

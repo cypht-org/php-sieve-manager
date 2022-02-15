@@ -15,7 +15,7 @@ class PlainAuthMechanism extends BaseAuthMechanism
         $args = base64_encode(implode('\0', [$this->authz_id, $this->username, $this->password]));
         return new SieveCommand(
             "AUTHENTICATE",
-            ["PLAIN", $args]
+            ['"PLAIN"', '"'.$args.'"']
         );
     }
 }
