@@ -2,3 +2,4 @@ test.php
 vendor/
 .idea/
 test.sieve
+composer.lock
