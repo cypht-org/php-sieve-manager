@@ -180,8 +180,29 @@ class Client extends SieveClient
     }
 
     /**
-     * @param $num_lines
+     * @return void
+     */
+    public function logout() {
+        $this->sendCommand("LOGOUT");
+    }
+
+    /**
+     * @return string|null
+     */
+    public function capability() {
+        $return_payload = $this->sendCommand("CAPABILITY", null, true);
+        if ($return_payload['code'] == 'OK') {
+            return $return_payload['response'];
+        }
+        return null;
+    }
+
+    /**
+     * @param int $num_lines
      * @return array
+     * @throws LiteralException
+     * @throws ResponseException
+     * @throws SocketException
      */
     private function readResponse($num_lines = -1) {
         $response = "";
@@ -240,10 +261,13 @@ class Client extends SieveClient
      */
     private function sendCommand($name, $args=null, $withResponse=false, $extralines=null, $numLines=-1) {
         $command = $name;
-        if ($args) {
+        if ($args != null) {
             $command .= ' ';
             $command .= implode(' ', $args);
         }
+
+        $command = $command."\r\n";
+
         $this->debugPrint($command);
         socket_write($this->sock, $command, strlen($command));
 
@@ -253,6 +277,7 @@ class Client extends SieveClient
             }
         }
         $response_payload = $this->readResponse($numLines);
+
         if ($withResponse) {
             return [
                 "code" => $response_payload["code"],
@@ -333,12 +358,12 @@ class Client extends SieveClient
         if (($this->sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP)) === false) {
             throw new SocketException("Socket creation failed: " . socket_strerror(socket_last_error()));
         }
+        socket_set_option($this->sock,SOL_SOCKET, SO_RCVTIMEO, array("sec"=>$this->readTimeout, "usec"=>0));
 
         if(($result = socket_connect($this->sock, $this->addr, $this->port)) === false) {
             throw new SocketException("Socket connect failed: (".$result.") " . socket_strerror(socket_last_error($this->sock)));
         }
         $this->connected = true;
-
         if (!$this->getCapabilitiesFromServer()) {
             throw new SocketException("Failed to read capabilities from the server");
         }
