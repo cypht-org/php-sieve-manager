@@ -1,0 +1,19 @@
+{
+    "name": "henrique-borba/php-sieve-manager",
+    "description": "PHP library to create and manage Sieve filters through the ManageSieve protocol",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "PhpSieveManager\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Henrique Borba",
+            "email": "henrique.borba.dev@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {}
+}
