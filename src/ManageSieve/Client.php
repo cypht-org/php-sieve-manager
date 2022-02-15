@@ -323,8 +323,14 @@ class Client implements SieveClient
         ];
     }
 
-    public function getSASLMechanism() {
-
+    /**
+     * Return the supported authentication mechanism
+     * from the server.
+     *
+     * @return false|string[]
+     */
+    public function getSASLMechanisms() {
+        return explode(" ", $this->capabilities["SASL"]);
     }
 
     /**
@@ -332,16 +338,19 @@ class Client implements SieveClient
      *
      * @param $username
      * @param $password
-     * @param $authz_id
+     * @param string $authz_id
      * @param $auth_mechanism
-     * @return void
+     * @return bool
+     * @throws LiteralException
+     * @throws ResponseException
      * @throws SieveException
+     * @throws SocketException
      */
     private function authenticate($username, $password, $authz_id="", $auth_mechanism=null) {
          if(!array_key_exists("SASL", $this->capabilities)) {
              throw new SieveException("SASL not supported");
          }
-         $server_mechanisms = $this->getSASLMechanism();
+         $server_mechanisms = $this->getSASLMechanisms();
 
          $mech_list = $this::SUPPORTED_AUTH_MECHS;
          if ($auth_mechanism != null && in_array($auth_mechanism, $this::SUPPORTED_AUTH_MECHS)) {
@@ -352,8 +361,26 @@ class Client implements SieveClient
              if (!in_array($mech, $server_mechanisms)) {
                  continue;
              }
-             $mech = str_replace(strtolower($mech), "-", "_");
+             $mech = str_replace("-", "", strtolower($mech));
+             $authentication_method = "PhpSieveManager\ManageSieve\Auth\\".ucfirst($mech)."AuthMechanism";
+             $auth_mechanism_obj = new $authentication_method($username, $password, $authz_id);
+             $generated_command = $auth_mechanism_obj->parse();
+             $return_payload = $this->sendCommand(
+                 $generated_command->name,
+                 $generated_command->args,
+                 $generated_command->withResponse,
+                 $generated_command->extralines,
+                 $generated_command->numLines
+             );
+             if ($return_payload['code'] == "OK") {
+                 $this->authenticated = true;
+                 return true;
+             }
+             return false;
          }
+
+         $this->errorMessage = "No suitable mechanism found";
+         return false;
     }
 
     /**
@@ -427,12 +454,12 @@ class Client implements SieveClient
      * @param string $username
      * @param string $password
      * @param bool $tls
-     * @return void
+     * @return bool
      * @throws LiteralException
      * @throws ResponseException
      * @throws SocketException|SieveException
      */
-    public function connect($username="", $password="", $tls=false) {
+    public function connect($username, $password, $tls=false, $authz_id="", $auth_mechanism=null) {
         if (($this->sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP)) === false) {
             throw new SocketException("Socket creation failed: " . socket_strerror(socket_last_error()));
         }
@@ -445,8 +472,10 @@ class Client implements SieveClient
         if (!$this->getCapabilitiesFromServer()) {
             throw new SocketException("Failed to read capabilities from the server");
         }
-
-        $this->authenticate($username, $password);
+        if ($this->authenticate($username, $password, $authz_id, $auth_mechanism)) {
+            return true;
+        }
+        return false;
     }
 
     /**
