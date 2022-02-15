@@ -181,6 +181,9 @@ class Client extends SieveClient
 
     /**
      * @return void
+     * @throws LiteralException
+     * @throws ResponseException
+     * @throws SocketException
      */
     public function logout() {
         $this->sendCommand("LOGOUT");
@@ -188,6 +191,9 @@ class Client extends SieveClient
 
     /**
      * @return string|null
+     * @throws LiteralException
+     * @throws ResponseException
+     * @throws SocketException
      */
     public function capability() {
         $return_payload = $this->sendCommand("CAPABILITY", null, true);
@@ -258,6 +264,9 @@ class Client extends SieveClient
      * @param $extralines
      * @param int $numLines
      * @return string[]
+     * @throws LiteralException
+     * @throws ResponseException
+     * @throws SocketException
      */
     private function sendCommand($name, $args=null, $withResponse=false, $extralines=null, $numLines=-1) {
         $command = $name;
@@ -308,6 +317,9 @@ class Client extends SieveClient
      * @param $name
      * @param $content
      * @return bool
+     * @throws LiteralException
+     * @throws ResponseException
+     * @throws SocketException
      */
     public function putScript($name, $content) {
         $content = $this->prepareContent($content);
@@ -320,6 +332,9 @@ class Client extends SieveClient
 
     /**
      * @return bool
+     * @throws LiteralException
+     * @throws ResponseException
+     * @throws SocketException
      */
     private function getCapabilitiesFromServer() {
         $payload = $this->readResponse();
@@ -348,10 +363,12 @@ class Client extends SieveClient
     }
 
     /**
-     * @param $username
-     * @param $password
+     * @param string $username
+     * @param string $password
      * @param bool $tls
      * @return void
+     * @throws LiteralException
+     * @throws ResponseException
      * @throws SocketException
      */
     public function connect($username="", $password="", $tls=false) {
@@ -361,7 +378,7 @@ class Client extends SieveClient
         socket_set_option($this->sock,SOL_SOCKET, SO_RCVTIMEO, array("sec"=>$this->readTimeout, "usec"=>0));
 
         if(($result = socket_connect($this->sock, $this->addr, $this->port)) === false) {
-            throw new SocketException("Socket connect failed: (".$result.") " . socket_strerror(socket_last_error($this->sock)));
+            throw new SocketException("Socket connect failed: " . socket_strerror(socket_last_error($this->sock)));
         }
         $this->connected = true;
         if (!$this->getCapabilitiesFromServer()) {
