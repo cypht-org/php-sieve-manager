@@ -2,6 +2,7 @@
 
 namespace PhpSieveManager\ManageSieve;
 
+use PhpSieveManager\Exceptions\ResponseException;
 use PhpSieveManager\Exceptions\LiteralException;
 use PhpSieveManager\Exceptions\SocketException;
 use PhpSieveManager\ManageSieve\Interfaces\SieveClient;
@@ -49,10 +50,10 @@ class Client extends SieveClient
      * @return void
      */
     private function initExpressions() {
-        $this->respCodeExpression = "(OK|NO|BYE)\s*(.+)?";
-        $this->errorCodeExpression = '(\([\w/-]+\))?\s*(".+")';
-        $this->sizeExpression = "\{(\d+)\+?\}";
-        $this->activeExpression = "ACTIVE";
+        $this->respCodeExpression = "#(OK|NO|BYE)\s*(.+)?#";
+        $this->errorCodeExpression = '#(\([\w/-]+\))?\s*(".+")#';
+        $this->sizeExpression = "#\{(\d+)\+?\}#";
+        $this->activeExpression = "#ACTIVE#";
     }
 
     /**
@@ -60,16 +61,21 @@ class Client extends SieveClient
      * @return false|string
      * @throws SocketException
      * @throws LiteralException
+     * @throws ResponseException
      */
     private function readLine() {
         $return = "";
         while (true) {
             try {
-                $pos = strpos($this->readBuffer, "\r\n");
-                $return = substr($this->readBuffer, 0, $pos);
-                $this->readBuffer = $this->readBuffer[$pos + strlen("\r\n")];
-                break;
-            } catch (\Exception $e) { }
+                if ($this->readBuffer != null) {
+                    $pos = strpos($this->readBuffer, "\r\n");
+                    $return = substr($this->readBuffer, 0, $pos);
+                    $this->readBuffer = substr($this->readBuffer, $pos + strlen("\r\n"));
+                    break;
+                }
+            } catch (\Exception $e) {
+                $this->debugPrint($e->getMessage());
+            }
 
             try {
                 $nval = socket_read($this->sock, $this->readSize);
@@ -90,13 +96,16 @@ class Client extends SieveClient
 
             preg_match($this->respCodeExpression, $return, $matches);
             if ($matches) {
+                if (strstr($matches[0], "NOTIFY")) {
+                    return $return;
+                }
                 switch ($matches[1]) {
                     case "BYE":
                         throw new SocketException("Connection closed by the server");
                     case "NO":
                         $this->parseError($matches[2]);
                 }
-                throw new SocketException($matches[1] . ' ' . $matches[2]);
+                throw new ResponseException($matches[1], $matches[2]);
             }
         }
 
@@ -137,6 +146,13 @@ class Client extends SieveClient
     }
 
     /**
+     * @return mixed
+     */
+    public function getErrorMessage() {
+        return $this->errorMessage;
+    }
+
+    /**
      * Parse errors received from the server
      *
      * @return void
@@ -156,11 +172,11 @@ class Client extends SieveClient
         }
 
         if (array_key_exists(1, $matches)) {
-            $this->errorCode = trim($matches[1], ['(', ')']);
+            $this->errorCode = trim($matches[1], '()');
         } else {
             $this->errorCode = "";
         }
-        $this->errorMessage = trim($matches[2], ['"']);
+        $this->errorMessage = trim($matches[2], '"');
     }
 
     /**
@@ -176,9 +192,9 @@ class Client extends SieveClient
         while (true) {
             try {
                 $line = $this->readLine();
-            } catch (SocketException $e) {
-                $code = $e->getCode();
-                $data = $e->getMessage();
+            } catch (ResponseException $e) {
+                $code = $e->code;
+                $data = $e->data;
                 break;
             } catch (LiteralException $e) {
                 $response .= $this->readBlock($e->getMessage());
@@ -206,28 +222,104 @@ class Client extends SieveClient
         ];
     }
 
+    private function debugPrint($message) {
+        if ($this->debug) {
+            echo ("[DEBUG][".date("%Y-%m-%d %H:%i:%s")."] " . $message. "\n");
+        }
+    }
+
+    /**
+     * Send a command to the server.
+     *
+     * @param $name
+     * @param $args
+     * @param bool $withResponse
+     * @param $extralines
+     * @param int $numLines
+     * @return string[]
+     */
+    private function sendCommand($name, $args=null, $withResponse=false, $extralines=null, $numLines=-1) {
+        $command = $name;
+        if ($args) {
+            $command .= ' ';
+            $command .= implode(' ', $args);
+        }
+        $this->debugPrint($command);
+        socket_write($this->sock, $command, strlen($command));
+
+        if ($extralines) {
+            foreach ($extralines as $line) {
+                socket_write($this->sock, $line, strlen($line));
+            }
+        }
+        $response_payload = $this->readResponse($numLines);
+        if ($withResponse) {
+            return [
+                "code" => $response_payload["code"],
+                "data" => $response_payload["data"],
+                "response" => $response_payload["response"]
+            ];
+        }
+
+        return [
+            "code" => $response_payload["code"],
+            "data" => $response_payload["data"]
+        ];
+    }
+
+    /**
+     * Format script before send to server
+     *
+     * @param $content
+     * @return string
+     */
+    private function prepareContent($content) {
+        return "{".strlen($content)."}"."\r\n".$content;
+    }
+
+    /**
+     * Upload script
+     *
+     * @param $name
+     * @param $content
+     * @return bool
+     */
+    public function putScript($name, $content) {
+        $content = $this->prepareContent($content);
+        $return_payload = $this->sendCommand("PUTSCRIPT", [$name, $content]);
+        if ($return_payload["code"] == "OK") {
+            return true;
+        }
+        return false;
+    }
+
     /**
      * @return bool
      */
-    private function getCapabilities() {
+    private function getCapabilitiesFromServer() {
         $payload = $this->readResponse();
         if ($payload["code"] == "NO") {
             return false;
         }
-
-        foreach (explode("\n", $payload["response"]) as $l) {
-            $parts = explode(" ", $l, 1);
-            $cname = trim($parts[0], ['"']);
+        foreach (explode("\r\n", $payload["response"]) as $l) {
+            $parts = explode(" ", $l, 2);
+            $cname = trim($parts[0], '"');
             if (!in_array($cname, $this::KNOWN_CAPABILITIES)) {
                 continue;
             }
-
             $this->capabilities[$cname] = null;
             if (count($parts) > 1) {
-                $this->capabilities[$cname] = trim($parts[1], ['"']);
+                $this->capabilities[$cname] = trim($parts[1], '"');
             }
         }
         return true;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCapabilities() {
+        return $this->capabilities;
     }
 
     /**
@@ -237,7 +329,7 @@ class Client extends SieveClient
      * @return void
      * @throws SocketException
      */
-    public function connect($username, $password, $tls=false) {
+    public function connect($username="", $password="", $tls=false) {
         if (($this->sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP)) === false) {
             throw new SocketException("Socket creation failed: " . socket_strerror(socket_last_error()));
         }
@@ -247,7 +339,7 @@ class Client extends SieveClient
         }
         $this->connected = true;
 
-        if (!$this->getCapabilities()) {
+        if (!$this->getCapabilitiesFromServer()) {
             throw new SocketException("Failed to read capabilities from the server");
         }
     }
