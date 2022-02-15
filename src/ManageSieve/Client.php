@@ -245,7 +245,7 @@ class Client extends SieveClient
 
     private function debugPrint($message) {
         if ($this->debug) {
-            echo ("[DEBUG][".date("%Y-%m-%d %H:%i:%s")."] " . $message. "\n");
+            echo ("[DEBUG][".date("Y-m-d H:i:s")."] " . $message. "\n");
         }
     }
 
