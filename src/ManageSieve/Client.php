@@ -97,12 +97,12 @@ class Client implements SieveClient
 
         if (strlen($return)) {
             preg_match($this->sizeExpression, $return, $matches);
-            if ($matches) {
+            if (count($matches)) {
                 throw new LiteralException($matches[1]);
             }
 
             preg_match($this->respCodeExpression, $return, $matches);
-            if ($matches) {
+            if (count($matches)) {
                 if (strpos($matches[0], "NOTIFY") !== false) {
                     return $return;
                 }
@@ -290,7 +290,7 @@ class Client implements SieveClient
      * @throws ResponseException
      * @throws SocketException
      */
-    private function sendCommand($name, $args=null, $withResponse=false, $extralines=null, $numLines=-1) {
+    public function sendCommand($name, $args=null, $withResponse=false, $extralines=null, $numLines=-1) {
         $command = $name;
         if ($args != null) {
             $command .= ' ';
@@ -363,7 +363,7 @@ class Client implements SieveClient
              }
              $mech = str_replace("-", "", strtolower($mech));
              $authentication_method = "PhpSieveManager\ManageSieve\Auth\\".ucfirst($mech)."AuthMechanism";
-             $auth_mechanism_obj = new $authentication_method($username, $password, $authz_id);
+             $auth_mechanism_obj = new $authentication_method($username, $password, $this, $authz_id);
              $generated_command = $auth_mechanism_obj->parse();
              $return_payload = $this->sendCommand(
                  $generated_command->name,
@@ -489,11 +489,16 @@ class Client implements SieveClient
      * Make sure the socket is closed when
      * the object is freed
      */
-    public function __destruct()
-    {
+    public function __destruct() {
         if ($this->connected) {
             $this->close();
         }
     }
 
+    /**
+     * @return string
+     */
+    public function getServerAddr() {
+        return $this->addr;
+    }
 }
