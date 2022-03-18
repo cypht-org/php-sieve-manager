@@ -226,7 +226,8 @@ class Client implements SieveClient
      * @throws ResponseException
      * @throws SocketException
      */
-    private function readResponse($num_lines = -1) {
+    private function readResponse($num_lines = -1): array
+    {
         $response = "";
         $code = null;
         $data = null;
@@ -346,7 +347,7 @@ class Client implements SieveClient
      * @throws SieveException
      * @throws SocketException
      */
-    private function authenticate($username, $password, $authz_id="", $auth_mechanism=null) {
+    private function authenticate($username, $password, string $authz_id = "", $auth_mechanism=null) {
          if(!array_key_exists("SASL", $this->capabilities)) {
              throw new SieveException("SASL not supported");
          }
