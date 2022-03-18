@@ -42,7 +42,7 @@ class FilterParser
         foreach ($this->requirements as $req) {
             $reqs[] = '"'.$req.'"';
         }
-        $parsed .= 'require ['.implode(',', $reqs).']'."\n";
+        $parsed .= 'require ['.implode(',', $reqs).'];'."\n";
         return $parsed;
     }
 
