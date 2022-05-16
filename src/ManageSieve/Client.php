@@ -305,9 +305,10 @@ class Client implements SieveClient
 
         if ($extralines) {
             foreach ($extralines as $line) {
-                socket_write($this->sock, $line, strlen($line));
+                socket_write($this->sock, $line."\r\n", strlen($line."\r\n"));
             }
         }
+
         $response_payload = $this->readResponse($numLines);
 
         if ($withResponse) {
@@ -373,6 +374,7 @@ class Client implements SieveClient
                  $generated_command->extralines,
                  $generated_command->numLines
              );
+             print_r($return_payload);die;
              if ($return_payload['code'] == "OK") {
                  $this->authenticated = true;
                  return true;
@@ -476,14 +478,19 @@ class Client implements SieveClient
         if ($this->authenticate($username, $password, $authz_id, $auth_mechanism)) {
             return true;
         }
-        return false;
+        throw new SieveException("Error while trying to connect to ManageSieve");
     }
 
     /**
      * @return void
      */
     public function close() {
-        socket_close($this->sock);
+        if ($this->connected) {
+            try {
+                $this->connected = false;
+                socket_close($this->sock);
+            } catch (\Exception $e) {}
+        }
     }
 
     /**

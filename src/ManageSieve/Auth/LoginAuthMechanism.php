@@ -1,11 +1,10 @@
 <?php
 
-namespace ManageSieve\Auth;
+namespace PhpSieveManager\ManageSieve\Auth;
 
-use PhpSieveManager\ManageSieve\Auth\BaseAuthMechanism;
 use PhpSieveManager\ManageSieve\SieveCommand;
 
-class LoginAuthentication extends BaseAuthMechanism
+class LoginAuthMechanism extends BaseAuthMechanism
 {
     /**
      * SASL Authentication
