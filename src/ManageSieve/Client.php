@@ -374,7 +374,7 @@ class Client implements SieveClient
                  $generated_command->extralines,
                  $generated_command->numLines
              );
-             print_r($return_payload);die;
+
              if ($return_payload['code'] == "OK") {
                  $this->authenticated = true;
                  return true;
@@ -393,7 +393,7 @@ class Client implements SieveClient
      * @return string
      */
     private function prepareContent($content) {
-        return "{".strlen($content)."}"."\r\n".$content;
+        return "{".strlen($content)."+}"."\r\n".$content;
     }
 
     /**
@@ -408,7 +408,7 @@ class Client implements SieveClient
      */
     public function putScript($name, $content) {
         $content = $this->prepareContent($content);
-        $return_payload = $this->sendCommand("PUTSCRIPT", [$name, $content]);
+        $return_payload = $this->sendCommand("PUTSCRIPT", ['"'.$name.'"', $content]);
         if ($return_payload["code"] == "OK") {
             return true;
         }
