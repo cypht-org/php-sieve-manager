@@ -291,7 +291,8 @@ class Client implements SieveClient
      * @throws ResponseException
      * @throws SocketException
      */
-    public function sendCommand($name, $args=null, $withResponse=false, $extralines=null, $numLines=-1) {
+    public function sendCommand($name, $args=null, $withResponse=false, $extralines=null, $numLines=-1): array
+    {
         $command = $name;
         if ($args != null) {
             $command .= ' ';
@@ -348,7 +349,8 @@ class Client implements SieveClient
      * @throws SieveException
      * @throws SocketException
      */
-    private function authenticate($username, $password, string $authz_id = "", $auth_mechanism=null) {
+    private function authenticate($username, $password, string $authz_id = "", $auth_mechanism=null): bool
+    {
          if(!array_key_exists("SASL", $this->capabilities)) {
              throw new SieveException("SASL not supported");
          }
@@ -392,7 +394,8 @@ class Client implements SieveClient
      * @param $content
      * @return string
      */
-    private function prepareContent($content) {
+    private function prepareContent($content): string
+    {
         return "{".strlen($content)."+}"."\r\n".$content;
     }
 
@@ -406,11 +409,34 @@ class Client implements SieveClient
      * @throws ResponseException
      * @throws SocketException
      */
-    public function putScript($name, $content) {
+    public function putScript($name, $content): bool
+    {
         $content = $this->prepareContent($content);
         $return_payload = $this->sendCommand("PUTSCRIPT", ['"'.$name.'"', $content]);
         if ($return_payload["code"] == "OK") {
             return true;
+        }
+        return false;
+    }
+
+    /**
+     * Retrieve script
+     *
+     * @return bool|array
+     * @throws LiteralException
+     * @throws ResponseException
+     * @throws SocketException
+     */
+    public function listScripts() {
+        $return_payload = $this->sendCommand("LISTSCRIPTS", NULL, true);
+        if ($return_payload["code"] == "OK") {
+            $scripts = [];
+            foreach (explode("\n", $return_payload['response']) as $script_name) {
+                if (trim($script_name) != '') {
+                    $scripts[] = $script_name;
+                }
+            }
+            return $scripts;
         }
         return false;
     }
@@ -423,7 +449,8 @@ class Client implements SieveClient
      * @throws ResponseException
      * @throws SocketException
      */
-    private function getCapabilitiesFromServer() {
+    private function getCapabilitiesFromServer(): bool
+    {
         $payload = $this->readResponse();
         if ($payload["code"] == "NO") {
             return false;
@@ -506,7 +533,8 @@ class Client implements SieveClient
     /**
      * @return string
      */
-    public function getServerAddr() {
+    public function getServerAddr(): string
+    {
         return $this->addr;
     }
 }
