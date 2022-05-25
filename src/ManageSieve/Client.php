@@ -85,7 +85,7 @@ class Client implements SieveClient
             }
 
             try {
-                $nval = socket_read($this->sock, $this->readSize);
+                $nval = \socket_read($this->sock, $this->readSize);
                 if ($nval === false) {
                     break;
                 }
@@ -144,7 +144,7 @@ class Client implements SieveClient
         }
 
         try {
-            $buffer .= socket_read($this->sock, $size);
+            $buffer .= \socket_read($this->sock, $size);
         } catch (\Exception $e) {
             throw new SocketException("Failed to read from the server");
         }
@@ -302,11 +302,11 @@ class Client implements SieveClient
         $command = $command."\r\n";
 
         $this->debugPrint($command);
-        socket_write($this->sock, $command, strlen($command));
+        \socket_write($this->sock, $command, strlen($command));
 
         if ($extralines) {
             foreach ($extralines as $line) {
-                socket_write($this->sock, $line."\r\n", strlen($line."\r\n"));
+                \socket_write($this->sock, $line."\r\n", strlen($line."\r\n"));
             }
         }
 
@@ -490,13 +490,13 @@ class Client implements SieveClient
      * @throws SocketException|SieveException
      */
     public function connect($username, $password, $tls=false, $authz_id="", $auth_mechanism=null) {
-        if (($this->sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP)) === false) {
-            throw new SocketException("Socket creation failed: " . socket_strerror(socket_last_error()));
+        if (($this->sock = \socket_create(AF_INET, SOCK_STREAM, SOL_TCP)) === false) {
+            throw new SocketException("Socket creation failed: " . \socket_strerror(socket_last_error()));
         }
-        socket_set_option($this->sock,SOL_SOCKET, SO_RCVTIMEO, array("sec"=>$this->readTimeout, "usec"=>0));
+        \socket_set_option($this->sock,SOL_SOCKET, SO_RCVTIMEO, array("sec"=>$this->readTimeout, "usec"=>0));
 
-        if(($result = socket_connect($this->sock, $this->addr, $this->port)) === false) {
-            throw new SocketException("Socket connect failed: " . socket_strerror(socket_last_error($this->sock)));
+        if(($result = \socket_connect($this->sock, $this->addr, $this->port)) === false) {
+            throw new SocketException("Socket connect failed: " . \socket_strerror(\socket_last_error($this->sock)));
         }
         $this->connected = true;
         if (!$this->getCapabilitiesFromServer()) {
@@ -515,7 +515,7 @@ class Client implements SieveClient
         if ($this->connected) {
             try {
                 $this->connected = false;
-                socket_close($this->sock);
+                \socket_close($this->sock);
             } catch (\Exception $e) {}
         }
     }
