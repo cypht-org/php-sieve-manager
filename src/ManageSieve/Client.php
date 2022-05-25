@@ -433,7 +433,7 @@ class Client implements SieveClient
             $scripts = [];
             foreach (explode("\n", $return_payload['response']) as $script_name) {
                 if (trim($script_name) != '') {
-                    $scripts[] = trim($script_name, '"');
+                    $scripts[] = substr($script_name, 1, -2);
                 }
             }
             return $scripts;
