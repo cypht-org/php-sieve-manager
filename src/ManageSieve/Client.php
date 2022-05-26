@@ -420,6 +420,24 @@ class Client implements SieveClient
     }
 
     /**
+     * Delete script
+     *
+     * @param string $name
+     * @return bool
+     * @throws LiteralException
+     * @throws ResponseException
+     * @throws SocketException
+     */
+    public function removeScripts(string $name): bool
+    {
+        $return_payload = $this->sendCommand("DELETESCRIPT", ['"'.$name.'"']);
+        if ($return_payload["code"] == "OK") {
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Retrieve script
      *
      * @return bool|array
