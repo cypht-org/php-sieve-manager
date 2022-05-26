@@ -128,9 +128,9 @@ class Client implements SieveClient
      */
     private function readBlock($size) {
         $buffer = "";
-        if (count($this->readBuffer)) {
-            $limit = count($this->readBuffer);
-            if ($size <= count($this->readBuffer)) {
+        if (strlen($this->readBuffer)) {
+            $limit = strlen($this->readBuffer);
+            if ($size <= strlen($this->readBuffer)) {
                 $limit = $size;
             }
 
@@ -415,6 +415,24 @@ class Client implements SieveClient
         $return_payload = $this->sendCommand("PUTSCRIPT", ['"'.$name.'"', $content]);
         if ($return_payload["code"] == "OK") {
             return true;
+        }
+        return false;
+    }
+
+    /**
+     * Delete script
+     *
+     * @param string $name
+     * @return bool
+     * @throws LiteralException
+     * @throws ResponseException
+     * @throws SocketException
+     */
+    public function getScript(string $name)
+    {
+        $return_payload = $this->sendCommand("GETSCRIPT", ['"'.$name.'"'], true);
+        if ($return_payload["code"] == "OK") {
+            return $return_payload['response'];
         }
         return false;
     }
