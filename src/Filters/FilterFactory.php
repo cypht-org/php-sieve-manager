@@ -19,7 +19,7 @@ class FilterFactory
     /**
      * @param $name string Script Name
      */
-    private function __construct($name)
+    private function __construct(string $name)
     {
         $this->name = $name;
     }
@@ -28,7 +28,7 @@ class FilterFactory
      * @param $name string
      * @return FilterFactory
      */
-    public static function create(string $name)
+    public static function create(string $name): FilterFactory
     {
         return new FilterFactory($name);
     }
@@ -36,7 +36,7 @@ class FilterFactory
     /**
      * @return string
      */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }

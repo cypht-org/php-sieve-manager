@@ -119,22 +119,6 @@ class FilterCriteria
     }
 
     /**
-     * @param FilterCriteria $value
-     * @return FilterCriteria
-     */
-    public function and(FilterCriteria $value) {
-        return $this;
-    }
-
-    /**
-     * @param FilterCriteria $value
-     * @return FilterCriteria
-     */
-    public function or(FilterCriteria $value) {
-        return $this;
-    }
-
-    /**
      * @param FilterCriteria $criteria
      * @return $this
      */
@@ -145,38 +129,11 @@ class FilterCriteria
     }
 
     /**
-     * @param $action
-     * @return FilterCriteria
-     */
-    public function addAction($action)
-    {
-        $this->actions[] = $action;
-        return $this;
-    }
-
-    /**
      * @return string
      */
     public function parse($index = 0)
     {
-        $parsed_str = "";
-        if ($index == 0) {
-            $parsed_str .= "\nif ".$this->target_field." ".$this->comparator." ".$this->value. " {";
-        } else {
-            if ($this->target_field != "") {
-                $parsed_str .= "\nelsif ".$this->comparator." ".$this->value. " {";
-            } else {
-                $parsed_str .= "\nelse {";
-            }
-        }
-        foreach ($this->subcriterias as $idx => $subcriteria) {
-            $parsed_str .= $subcriteria->parse($idx);
-        }
-
-        foreach ($this->actions as $action) {
-            $parsed_str .= "\n\t".$action->parse();
-        }
-        $parsed_str .= "\n}";
+        $parsed_str = $this->target_field." ".$this->comparator." ".$this->value;
         return $parsed_str;
     }
 }
