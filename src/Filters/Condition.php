@@ -16,9 +16,8 @@ class Condition
     /**
      * @param string $description
      */
-    public function __construct(string $description = "", FilterCriteria $first_criteria, $test_list='anyof')
+    public function __construct(string $description = "", $test_list='anyof')
     {
-        $this->addCriteria($first_criteria);
         $this->description = $description;
         $this->test_list = $test_list;
     }
