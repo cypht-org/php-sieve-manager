@@ -37,6 +37,10 @@ class FilterParser
      * @return string
      */
     private function parseRequirements() {
+        if (!count($this->requirements)) {
+            return "";
+        }
+
         $parsed = "# Requirements\n";
         $reqs = [];
         foreach ($this->requirements as $req) {
