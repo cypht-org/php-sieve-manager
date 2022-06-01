@@ -23,6 +23,6 @@ class FileIntoFilterAction implements FilterAction
      * @return string
      */
     public function parse() {
-        return 'fileinto "'.$this->params[0].'";';
+        return 'fileinto "'.$this->params[0].'";'."\n";
     }
 }

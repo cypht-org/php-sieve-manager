@@ -438,6 +438,24 @@ class Client implements SieveClient
     }
 
     /**
+     * Activate script
+     *
+     * @param string $name
+     * @return bool
+     * @throws LiteralException
+     * @throws ResponseException
+     * @throws SocketException
+     */
+    public function activateScript(string $name): bool
+    {
+        $return_payload = $this->sendCommand("SETACTIVE", ['"'.$name.'"']);
+        if ($return_payload["code"] == "OK") {
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Delete script
      *
      * @param string $name
