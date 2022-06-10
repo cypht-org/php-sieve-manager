@@ -57,6 +57,11 @@ class FilterFactory
      */
     public function setCondition(Condition $condition): FilterFactory
     {
+        if (count($condition->getRequirements()) > 0) {
+            foreach ($condition->getRequirements() as $req) {
+                $this->addRequirement($req);
+            }
+        }
         $this->conditions = $condition;
         return $this;
     }

@@ -7,6 +7,7 @@ class Condition
     private $description = "";
     private $criterias = [];
     private $test_list = 'anyof';
+    private $requirements = [];
 
     /**
      * @var string
@@ -36,8 +37,18 @@ class Condition
      */
     public function addAction($action)
     {
+        if (isset($action->require)) {
+            $this->requirements[] = $action->require;
+        }
         $this->actions[] = $action;
         return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getRequirements() {
+        return $this->requirements;
     }
 
     /**
