@@ -228,6 +228,7 @@ class Client implements SieveClient
      */
     private function readResponse($num_lines = -1): array
     {
+        $empty_return_count = 0;
         $response = "";
         $code = null;
         $data = null;
@@ -249,7 +250,11 @@ class Client implements SieveClient
             }
 
             if (!strlen($line)) {
-                continue;
+                $empty_return_count = $empty_return_count + 1;
+                if ($empty_return_count < 5) {
+                    continue;
+                }
+                throw new SocketException("readResponse time out");
             }
 
             $response .= $line . "\r\n";
