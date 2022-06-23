@@ -83,7 +83,7 @@ class FilterCriteria
      * @return $this
      */
     public function matches(string $value) {
-        $this->comparator = ':matches';
+        $this->comparator = ':is';
         $this->value = $value;
         return $this;
     }
