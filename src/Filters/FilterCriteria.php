@@ -102,6 +102,16 @@ class FilterCriteria
      * @param string $value
      * @return $this
      */
+    public function regex(string $value) {
+        $this->comparator = ':regex';
+        $this->value = $value;
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     * @return $this
+     */
     public function under(string $value) {
         $this->comparator = ':under';
         $this->value = $value;
