@@ -17,7 +17,6 @@
     ],
     "minimum-stability": "dev",
     "require": {
-        "php": ">=5.4",
-      "ext-sockets": "*"
+        "php": ">=5.4"
     }
 }
