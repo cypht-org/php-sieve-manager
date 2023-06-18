@@ -64,14 +64,14 @@ class Condition
     /**
      * @return string
      */
-    public function parse()
+    public function parse($first = true)
     {
         $parsed_str = "\n";
         if ($this->description != "") {
             $parsed_str .= "# ".$this->description. "\n";
         }
 
-        $parsed_str .= 'if ';
+        $parsed_str .= $first ? 'if ' : 'elsif ';
         if (count($this->criterias) > 1) {
             $parsed_str .= $this->test_list.'(';
         }

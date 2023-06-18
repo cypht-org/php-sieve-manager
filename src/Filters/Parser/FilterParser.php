@@ -17,7 +17,7 @@ class FilterParser
      * @param array $requirements
      * @param Condition $conditions
      */
-    public function __construct(array $requirements, Condition $conditions) {
+    public function __construct(array $requirements, array $conditions) {
         $this->requirements = $requirements;
         $this->conditions = $conditions;
     }
@@ -27,7 +27,7 @@ class FilterParser
      * @param Condition $conditions
      * @return string
      */
-    public static function parseFromConditions(array $requirements, Condition $conditions)
+    public static function parseFromConditions(array $requirements, array $conditions)
     {
         $parser = new self($requirements, $conditions);
         return $parser->parse();
@@ -54,7 +54,11 @@ class FilterParser
      * @return string
      */
     private function parseConditions() {
-        return $this->conditions->parse();
+        $ret = '';
+        foreach ($this->conditions as $key => $condition) {
+            $ret .= $condition->parse($key == 0);
+        }
+        return $ret;
     }
 
     /**
