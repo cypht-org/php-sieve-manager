@@ -14,7 +14,7 @@ class FilterFactory
     /**
      * @var Condition
      */
-    private $conditions;
+    private $conditions = [];
 
     /**
      * @param $name string Script Name
@@ -47,7 +47,9 @@ class FilterFactory
      */
     public function addRequirement(string $requirement): FilterFactory
     {
-        $this->require[] = $requirement;
+        if (! in_array($requirement, $this->require)) {
+            $this->require[] = $requirement;
+        }
         return $this;
     }
 
@@ -62,7 +64,7 @@ class FilterFactory
                 $this->addRequirement($req);
             }
         }
-        $this->conditions = $condition;
+        $this->conditions[] = $condition;
         return $this;
     }
 
