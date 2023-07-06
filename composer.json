@@ -1,7 +1,7 @@
 {
     "name": "henrique-borba/php-sieve-manager",
     "description": "PHP library to create and manage Sieve filters through the ManageSieve protocol",
-    "keywords": ["php", "sieve", "managesieve", "imap", "email"],
+    "keywords": ["php", "sieve", "managesieve", "imap", "email", "cypht"],
     "type": "library",
     "license": "MIT",
     "autoload": {
