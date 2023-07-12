@@ -1,6 +1,6 @@
 # php-sieve-manager
 
-A native PHP library for managing the ManageSieve protocol and generate basic sieve scripts. Used by Cypht Webmail and available to all PHP projects via https://packagist.org/packages/henrique-borba/php-sieve-manager
+A native PHP library for managing the ManageSieve protocol and generate basic sieve scripts. Used by Cypht Webmail and available to all PHP projects via https://packagist.org/packages/cypht-org/php-sieve-manager
 
 # How to use
 
