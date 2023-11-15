@@ -246,7 +246,7 @@ class Client implements SieveClient
                 if (StringUtils::endsWith($response, "\r\n")) {
                     $response .= $this->readLine() . "\r\n";
                 }
-                continue;
+                break;
             }
 
             if (!strlen($line)) {
