@@ -1,6 +1,6 @@
 {
     "name": "cypht-org/php-sieve-manager",
-    "description": "PHP library to create and manage Sieve filters through the ManageSieve protocol",
+    "description": "PHP library to create and manage Sieve filters through the ManageSieve protocol (RFC5228)",
     "keywords": ["mail", "php", "sieve", "managesieve", "filters", "imap", "email", "cypht", "RFC5228"],
     "type": "library",
     "license": "MIT",
