@@ -96,11 +96,6 @@ class Client implements SieveClient
         }
 
         if (strlen($return)) {
-            preg_match($this->sizeExpression, $return, $matches);
-            if (count($matches)) {
-                throw new LiteralException($matches[1]);
-            }
-
             preg_match($this->respCodeExpression, $return, $matches);
             if (count($matches)) {
                 if (strpos($matches[0], "NOTIFY") !== false) {
@@ -113,6 +108,11 @@ class Client implements SieveClient
                         $this->parseError($matches[2]);
                 }
                 throw new ResponseException($matches[1], $matches[2]);
+            }
+
+            preg_match($this->sizeExpression, $return, $matches);
+            if (count($matches)) {
+                throw new LiteralException($matches[1]);
             }
         }
 
@@ -246,7 +246,7 @@ class Client implements SieveClient
                 if (StringUtils::endsWith($response, "\r\n")) {
                     $response .= $this->readLine() . "\r\n";
                 }
-                break;
+                continue;
             }
 
             if (!strlen($line)) {
