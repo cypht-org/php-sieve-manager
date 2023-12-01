@@ -550,6 +550,7 @@ class Client implements SieveClient
                 $this->capabilities[$cname] = trim($parts[1], '"');
             }
         }
+        $this->capabilities['extensions'] = preg_split('/\s+/', $this->capabilities['SIEVE']);
         return true;
     }
 
@@ -622,5 +623,52 @@ class Client implements SieveClient
     public function getServerAddr(): string
     {
         return $this->addr;
+    }
+
+    /**
+     * Gets list of extensions that server supports.
+     *
+     * @return array
+     */
+    public function getExtensions()
+    {
+        return $this->capabilities['extensions'] ?? [];
+    }
+
+    /**
+     * Checks if server has extension
+     *
+     * @param string $extension
+     * @return boolean
+     */
+    public function hasExtension($extension)
+    {
+        $extension = trim(strtolower($extension));
+        if (is_array($this->capabilities['extensions'])) {
+            foreach ($this->capabilities['extensions'] as $ext) {
+                if ($ext == $extension) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks if server can store script
+     *
+     * @param string $name The name of the script.
+     * @param string $size The size of the script.
+     *
+     * @return boolean
+     */
+    public function hasSpace($name, $size)
+    {
+        $return_payload = $this->sendCommand("HAVESPACE", ['"'.$name.'"', $size]);
+        if ($return_payload["code"] == "OK") {
+            return true;
+        }
+        return false;
     }
 }
