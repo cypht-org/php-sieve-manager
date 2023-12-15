@@ -671,4 +671,39 @@ class Client implements SieveClient
         }
         return false;
     }
+
+    /**
+     * Verifies script validity without storing the script on the server
+     *
+     * @param string $name The name of the script.
+     * @param string $size The size of the script.
+     *
+     * @return boolean
+     */
+    public function checkScript($content)
+    {
+        $content = $this->prepareContent($content);
+        $return_payload = $this->sendCommand("CHECKSCRIPT", [$content]);
+        if ($return_payload["code"] == "OK") {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Used for re-synchronization or to reset any inactivity auto-logout timer on the server.
+     *
+     * @param string $name The name of the script.
+     * @param string $size The size of the script.
+     *
+     * @return boolean
+     */
+    public function noop()
+    {
+        $return_payload = $this->sendCommand("NOOP");
+        if ($return_payload["code"] == "OK") {
+            return true;
+        }
+        return false;
+    }
 }
