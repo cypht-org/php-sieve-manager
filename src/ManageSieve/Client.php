@@ -14,7 +14,7 @@ use PhpSieveManager\Utils\StringUtils;
  */
 class Client implements SieveClient
 {
-    const SUPPORTED_AUTH_MECHS = ["DIGEST-MD5", "PLAIN", "LOGIN"];
+    const SUPPORTED_AUTH_MECHS = ["DIGEST-MD5", "PLAIN", "LOGIN", "EXTERNAL", "OAUTHBEARER", "XOAUTH2"];
     const KNOWN_CAPABILITIES = ["IMPLEMENTATION", "SASL", "SIEVE", "STARTTLS", "NOTIFY", "LANGUAGE", "VERSION"];
 
     private $readSize = 4096;
