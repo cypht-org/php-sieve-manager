@@ -62,6 +62,12 @@ class Client implements SieveClient
         $this->activeExpression = "#ACTIVE#";
     }
 
+    private function getSingleLine() {
+        $pos = strpos($this->readBuffer, "\r\n");
+        $return = substr($this->readBuffer, 0, $pos);
+        return [$return, $pos];
+    }
+
     /**
      * Read line from the server
      *
@@ -75,8 +81,7 @@ class Client implements SieveClient
         while (true) {
             try {
                 if ($this->readBuffer != null) {
-                    $pos = strpos($this->readBuffer, "\r\n");
-                    $return = substr($this->readBuffer, 0, $pos);
+                    list($return, $pos) = $this->getSingleLine();
                     $this->readBuffer = substr($this->readBuffer, $pos + strlen("\r\n"));
                     break;
                 }
@@ -172,7 +177,13 @@ class Client implements SieveClient
         preg_match($this->sizeExpression, $text, $matches);
         if ($matches) {
             $this->errorCode = "";
-            $this->errorMessage = $this->readBlock($matches[1] + 2);
+            $errorMessage = $matches[1] + 2;
+            list($nextLine, $_) = $this->getSingleLine();
+            if (preg_match('/^\d+$/', trim($errorMessage)) && preg_match('/error:/i', $nextLine)) {
+                $this->errorMessage = $nextLine;
+            } else {
+                $this->errorMessage = $this->readBlock($errorMessage);
+            }
             return;
         }
 
