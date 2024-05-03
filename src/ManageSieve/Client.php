@@ -358,6 +358,16 @@ class Client implements SieveClient
     }
 
     /**
+     * Return true if server support the mechanism
+     *
+     * @return bool
+     */
+    public function hasSASLMechanism($mech)
+    {
+        return in_array($mech, $this->getSASLMechanisms());
+    }
+
+    /**
      * Authenticate to server
      *
      * @param $username
@@ -712,6 +722,23 @@ class Client implements SieveClient
     public function noop()
     {
         $return_payload = $this->sendCommand("NOOP");
+        if ($return_payload["code"] == "OK") {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Rename a user's Sieve script
+     *
+     * @param string $oldName The old Script name
+     * @param string $newName The new Script name
+     *
+     * @return boolean
+     */
+    public function renameScript($oldName, $newName)
+    {
+        $return_payload = $this->sendCommand("RENAMESCRIPT", ['"'.$oldName.'"', '"'.$newName.'"',]);
         if ($return_payload["code"] == "OK") {
             return true;
         }
