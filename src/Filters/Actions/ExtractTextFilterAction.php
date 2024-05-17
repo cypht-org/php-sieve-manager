@@ -2,33 +2,40 @@
 
 namespace PhpSieveManager\Filters\Actions;
 
-use PhpSieveManager\Exceptions\FilterActionParamException;
-
 /**
  * Please refer to https://www.rfc-editor.org/rfc/rfc5703.html#page-11
  */
 class ExtractTextFilterAction implements FilterAction
 {
-    private $params;
+    private $modifier;
+    private $first;
+    private $varName;
+
+    public $require = ['extracttext'];
 
     /**
-     * @param array $params
-     * @throws FilterActionParamException
+     * @param string $varName - Variable name to store extracted text
+     * @param string|null $modifier - Modifier for extraction
+     * @param int|null $first - Number of first characters to extract
      */
-    public function __construct(array $params = []) {
-        if ($params && count($params) > 2) {
-            throw new FilterActionParamException("ExtractTextFilterAction expect one or two parameters");
-        }
-        $this->params = $params;
+    public function __construct($varName, $modifier = null, $first = null) {
+        $this->modifier = $modifier;
+        $this->first = $first;
+        $this->varName = $varName;
     }
 
     /**
      * @return string
      */
     public function parse() {
-        if (count($this->params) == 1) {
-            return 'extracttext "'.$this->params[0].'";'."\n";
+        $script = "extracttext";
+        if ($this->modifier) {
+            $script .= " {$this->modifier}";
         }
-        return 'extracttext :first '.$this->params[0].' "'.$this->params[1].'";'."\n";
+        if ($this->first) {
+            $script .= " :first {$this->first}";
+        }
+        $script .= " \"{$this->varName}\";\n";
+        return $script;
     }
 }

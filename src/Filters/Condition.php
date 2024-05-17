@@ -38,7 +38,8 @@ class Condition
     public function addAction($action)
     {
         if (isset($action->require)) {
-            $this->requirements[] = $action->require;
+            $reqs = array_merge($this->requirements, $action->require);
+            $this->requirements = array_unique($reqs);
         }
         $this->actions[] = $action;
         return $this;

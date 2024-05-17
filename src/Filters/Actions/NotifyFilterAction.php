@@ -2,30 +2,55 @@
 
 namespace PhpSieveManager\Filters\Actions;
 
-use PhpSieveManager\Exceptions\FilterActionParamException;
-
 /**
  * Please refer to https://datatracker.ietf.org/doc/rfc5435/
  */
 class NotifyFilterAction implements FilterAction
 {
-    private $params;
+    private $from;
+    private $importance;
+    private $options;
+    private $message;
+    private $method;
+
+    public $require = ['enotify'];
 
     /**
-     * @param array $params
-     * @throws FilterActionParamException
+     * @param string $method - The notification method
+     * @param string|null $from - The sender of the notification
+     * @param int|null $importance - The importance level (optional, values: "1", "2", "3")
+     * @param array|null $options - Additional options for notification
+     * @param string|null $message - The notification message
      */
-    public function __construct(array $params = []) {
-        if (count($params) != 3) {
-            throw new FilterActionParamException("NotifyFilterAction expect three parameters");
+    public function __construct($method, $from = null, $importance = null, $options = [], $message = null) {
+        $this->method = $method;
+        $this->from = $from;
+        if ($importance < 1 || $importance > 3) {
+            $importance = 2;
         }
-        $this->params = $params;
+        $this->importance = $importance;
+        $this->options = $options;
+        $this->message = $message;
     }
 
     /**
      * @return string
      */
     public function parse() {
-        return 'notify :importance "'.$this->params[0].'" :text "'.$this->params[1].'" "'.$this->params[2].'";'."\n";
+        $script = "notify";
+        if ($this->from) {
+            $script .= " :from \"{$this->from}\"";
+        }
+        if ($this->importance) {
+            $script .= " :importance \"{$this->importance}\"";
+        }
+        if ($this->options) {
+            $script .= " :options [\"" . implode('", "', $this->options) . "\"]";
+        }
+        if ($this->message) {
+            $script .= " :message \"{$this->message}\"";
+        }
+        $script .= " \"{$this->method}\";\n";
+        return $script;
     }
 }

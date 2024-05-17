@@ -2,27 +2,21 @@
 
 namespace PhpSieveManager\Filters\Actions;
 
-use PhpSieveManager\Exceptions\FilterActionParamException;
-
 class RedirectFilterAction implements FilterAction
 {
-    private $params;
+    private $address;
 
     /**
-     * @param array $params
-     * @throws FilterActionParamException
+     * @param string $address - The address to redirect the message to
      */
-    public function __construct(array $params = []) {
-        if (count($params) != 1) {
-            throw new FilterActionParamException("RedirectFilterAction expect one parameter");
-        }
-        $this->params = $params;
+    public function __construct($address) {
+        $this->address = $address;
     }
 
     /**
      * @return string
      */
     public function parse() {
-        return 'redirect "'.$this->params[0].'";';
+        return "redirect \"{$this->address}\";\n";
     }
 }

@@ -2,27 +2,27 @@
 
 namespace PhpSieveManager\Filters\Actions;
 
-use PhpSieveManager\Exceptions\FilterActionParamException;
-
 class RejectFilterAction implements FilterAction
 {
-    private $params;
+    private $reason;
+    private $type;
+
+    public $require = ['reject'];
 
     /**
-     * @param array $params
-     * @throws FilterActionParamException
+     * @param string $reason
+     * @param bool $ereject
      */
-    public function __construct(array $params = []) {
-        if (count($params) != 1) {
-            throw new FilterActionParamException("RejectFilterAction expect one parameter");
-        }
-        $this->params = $params;
+    public function __construct($reason, $ereject = false) {
+        $this->reason = $reason;
+        $this->type = $ereject ? 'ereject' : 'reject';
+        $this->require[] = $this->type;
     }
 
     /**
      * @return string
      */
     public function parse() {
-        return 'reject "'.$this->params[0].'";';
+        return "{$this->type} \"{$this->reason}\";\n";
     }
 }
