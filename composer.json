@@ -1,22 +1,54 @@
 {
     "name": "cypht-org/php-sieve-manager",
-    "description": "PHP library to create and manage Sieve filters through the ManageSieve protocol (RFC5228)",
-    "keywords": ["mail", "php", "sieve", "managesieve", "filters", "imap", "email", "cypht", "RFC5228"],
+    "description": "A modern (started in 2022) PHP library for the ManageSieve protocol (RFC5804) to create/edit Sieve scripts (RFC5228). Used by Cypht Webmail.",
     "type": "library",
+    "keywords": [
+        "mail",
+        "php",
+        "sieve",
+        "managesieve",
+        "filters",
+        "imap",
+        "email",
+        "cypht",
+        "RFC5804",
+        "RFC5228"
+    ],
+    "homepage": "https://github.com/cypht-org/php-sieve-manager",
     "license": "MIT",
+    "authors": [
+        {
+            "name": "Henrique Borba",
+            "email": "henrique.borba.dev@gmail.com",
+            "role": "Initial developer, no longer active"
+        },
+        {
+            "name": "Victor Emanouilov",
+            "role": "Maintainer"
+        },
+        {
+            "name": "Josaphat Imani",
+            "role": "Maintainer"
+        },
+        {
+            "name": "Marc Laporte",
+            "role": "Maintainer",
+            "homepage": "https://MarcLaporte.com"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/cypht-org/php-sieve-manager/issues",
+        "wiki": "https://github.com/cypht-org/php-sieve-manager/wiki",
+        "source": "https://github.com/cypht-org/php-sieve-manager",
+        "chat": "https://gitter.im/cypht-org/community"
+    },
+    "require": {
+        "php": ">=5.4"
+    },
     "autoload": {
         "psr-4": {
             "PhpSieveManager\\": "src/"
         }
     },
-    "authors": [
-        {
-            "name": "Henrique Borba",
-            "email": "henrique.borba.dev@gmail.com"
-        }
-    ],
-    "minimum-stability": "stable",
-    "require": {
-        "php": ">=5.4"
-    }
+    "minimum-stability": "stable"
 }
