@@ -5,32 +5,23 @@ namespace PhpSieveManager\Filters\Actions;
 /**
  * Please refer to https://datatracker.ietf.org/doc/rfc5435/
  */
-class NotifyFilterAction implements FilterAction
+class NotifyFilterAction extends BaseSieveAction
 {
-    private $from;
-    private $importance;
-    private $options;
-    private $message;
-    private $method;
-
     public $require = ['enotify'];
 
-    /**
-     * @param string $method - The notification method
-     * @param string|null $from - The sender of the notification
-     * @param int|null $importance - The importance level (optional, values: "1", "2", "3")
-     * @param array|null $options - Additional options for notification
-     * @param string|null $message - The notification message
-     */
-    public function __construct($method, $from = null, $importance = null, $options = [], $message = null) {
-        $this->method = $method;
-        $this->from = $from;
-        if ($importance < 1 || $importance > 3) {
-            $importance = 2;
-        }
-        $this->importance = $importance;
-        $this->options = $options;
-        $this->message = $message;
+    protected function getRequiredParams()
+    {
+        return ['method'];
+    }
+
+    protected function getParamTypes() {
+        return [
+            'from' => 'string',
+            'importance' => 'int',
+            'options' => 'string-list',
+            'message' => 'string',
+            'method' => 'string',
+        ];
     }
 
     /**
@@ -38,19 +29,19 @@ class NotifyFilterAction implements FilterAction
      */
     public function parse() {
         $script = "notify";
-        if ($this->from) {
-            $script .= " :from \"{$this->from}\"";
+        if (!empty($this->params['from'])) {
+            $script .= " :from \"{$this->params['from']}\"";
         }
-        if ($this->importance) {
-            $script .= " :importance \"{$this->importance}\"";
+        if (!empty($this->params['importance'])) {
+            $script .= " :importance \"{$this->params['importance']}\"";
         }
-        if ($this->options) {
-            $script .= " :options [\"" . implode('", "', $this->options) . "\"]";
+        if (!empty($this->params['options'])) {
+            $script .= " :options [\"" . implode('", "', $this->params['options']) . "\"]";
         }
-        if ($this->message) {
-            $script .= " :message \"{$this->message}\"";
+        if (!empty($this->params['message'])) {
+            $script .= " :message \"{$this->params['message']}\"";
         }
-        $script .= " \"{$this->method}\";\n";
+        $script .= " \"{$this->params['method']}\";\n";
         return $script;
     }
 }

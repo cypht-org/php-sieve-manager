@@ -2,40 +2,25 @@
 
 namespace PhpSieveManager\Filters\Actions;
 
-class VacationFilterAction implements FilterAction
+class VacationFilterAction extends BaseSieveAction
 {
-    private $days;
-    private $subject;
-    private $from;
-    private $addresses;
-    private $mime;
-    private $handle;
-    private $reason;
-    private $seconds;
-
     public $require = ['vacation'];
 
-    /**
-     * @param string $reason - The reason for the vacation
-     * @param int|null $days - The number of days
-     * @param string|null $subject - The subject of the message
-     * @param string|null $from - The from address
-     * @param array|null $addresses - List of addresses
-     * @param string|null $mime - Mime flag
-     * @param string|null $handle - Handle
-     */
-    public function __construct($reason, $days = null, $seconds = null, $subject = null, $from = null, $addresses = [], $mime = null, $handle = null) {
-        $this->days = $days;
-        $this->subject = $subject;
-        $this->from = $from;
-        $this->addresses = $addresses;
-        $this->mime = $mime;
-        $this->handle = $handle;
-        $this->reason = $reason;
-        $this->seconds = $seconds;
-        if ($seconds) {
-            $this->require[] = 'vacation-seconds';
-        }
+    protected function getParamTypes() {
+        return [
+            'days' => 'int',
+            'seconds' => 'int',
+            'subject' => 'string',
+            'from' => 'string',
+            'addresses' => 'string-list',
+            'mime' => 'bool',
+            'handle' => 'string',
+            'reason' => 'string'
+        ];
+    }
+
+    protected function getRequiredParams() {
+        return ['reason'];
     }
 
     /**
@@ -43,27 +28,28 @@ class VacationFilterAction implements FilterAction
      */
     public function parse() {
         $script = "vacation";
-        if ($this->seconds) {
-            $script .= " :seconds {$this->days}";
-        } elseif ($this->days) {
-            $script .= " :days {$this->days}";
+        if (!empty($this->params['seconds'])) {
+            $script .= " :seconds {$this->params['seconds']}";
+            $this->require[] = 'vacation-seconds';
+        } elseif (!empty($this->params['days'])) {
+            $script .= " :days {$this->params['days']}";
         }
-        if ($this->subject) {
-            $script .= " :subject \"{$this->subject}\"";
+        if (!empty($this->params['subject'])) {
+            $script .= " :subject \"{$this->params['subject']}\"";
         }
-        if ($this->from) {
-            $script .= " :from \"{$this->from}\"";
+        if (!empty($this->params['from'])) {
+            $script .= " :from \"{$this->params['from']}\"";
         }
-        if ($this->addresses) {
-            $script .= " :addresses [\"" . implode('", "', $this->addresses) . "\"]";
+        if (!empty($this->params['addresses'])) {
+            $script .= " :addresses [\"" . implode('", "', $this->params['addresses']) . "\"]";
         }
-        if ($this->mime) {
-            $script .= " :mime {$this->mime}";
+        if (!empty($this->params['mime'])) {
+            $script .= " :mime {$this->params['mime']}";
         }
-        if ($this->handle) {
-            $script .= " :handle \"{$this->handle}\"";
+        if (!empty($this->params['handle'])) {
+            $script .= " :handle \"{$this->params['handle']}\"";
         }
-        $script .= " \"{$this->reason}\";\n";
+        $script .= " \"{$this->params['reason']}\";\n";
         return $script;
     }
 }

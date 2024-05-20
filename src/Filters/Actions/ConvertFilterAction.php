@@ -5,29 +5,27 @@ namespace PhpSieveManager\Filters\Actions;
 /**
  * Please refer to https://www.rfc-editor.org/rfc/rfc6558.html
  */
-class ConvertFilterAction implements FilterAction
+class ConvertFilterAction extends BaseSieveAction
 {
-    private $fromMediaType;
-    private $toMediaType;
-    private $transcodingParams;
-
     public $require = ['convert'];
 
-    /**
-     * @param string $fromMediaType - The source media type
-     * @param string $toMediaType - The target media type
-     * @param array $transcodingParams - Parameters for transcoding
-     */
-    public function __construct($fromMediaType, $toMediaType, array $transcodingParams) {
-        $this->fromMediaType = $fromMediaType;
-        $this->toMediaType = $toMediaType;
-        $this->transcodingParams = $transcodingParams;
+    protected function getRequiredParams()
+    {
+        return array_keys($this->getParamTypes());
+    }
+
+    protected function getParamTypes() {
+        return [
+            'quoted-from-media-type' => 'string',
+            'quoted-to-media-type' => 'string',
+            'transcoding-params' => 'string-list'
+        ];
     }
 
     /**
      * @return string
      */
     public function parse() {
-        return "convert \"{$this->fromMediaType}\" \"{$this->toMediaType}\" [" . implode(', ', array_map(function($param) { return "\"$param\""; }, $this->transcodingParams)) . "];\n";
+        return "convert \"{$this->params['quoted-from-media-type']}\" \"{$this->params['quoted-to-media-type']}\" [" . implode(', ', array_map(function($param) { return "\"$param\""; }, $this->params['transcoding-params'])) . "];\n";
     }
 }

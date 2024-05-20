@@ -2,39 +2,36 @@
 
 namespace PhpSieveManager\Filters\Actions;
 
-class Replace implements FilterAction {
-    private $mime;
-    private $subject;
-    private $from;
-    private $replacement;
-
+class Replace extends BaseSieveAction
+{
     public $require = ['replace'];
 
-    /**
-     * @param string $replacement - The replacement text
-     * @param string|null $mime - Mime
-     * @param string|null $subject - The subject of the message
-     * @param string|null $from - The from address
-     */
-    public function __construct($replacement, $mime = null, $subject = null, $from = null) {
-        $this->mime = $mime;
-        $this->subject = $subject;
-        $this->from = $from;
-        $this->replacement = $replacement;
+    protected function getRequiredParams()
+    {
+        return ['replacement'];
+    }
+
+    protected function getParamTypes() {
+        return [
+            'mime' => 'string',
+            'subject' => 'int',
+            'from' => 'string-list',
+            'replacement' => 'string',
+        ];
     }
 
     public function parse() {
         $script = "replace";
-        if ($this->mime) {
-            $script .= " :mime {$this->mime}";
+        if (!empty($this->params['mime'])) {
+            $script .= " :mime {$this->params['mime']}";
         }
-        if ($this->subject) {
-            $script .= " :subject \"{$this->subject}\"";
+        if (!empty($this->params['subject'])) {
+            $script .= " :subject \"{$this->params['subject']}\"";
         }
-        if ($this->from) {
-            $script .= " :from \"{$this->from}\"";
+        if (!empty($this->params['from'])) {
+            $script .= " :from \"{$this->params['from']}\"";
         }
-        $script .= " \"{$this->replacement}\";\n";
+        $script .= " \"{$this->params['replacement']}\";\n";
         return $script;
     }
 }

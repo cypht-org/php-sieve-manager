@@ -2,23 +2,23 @@
 
 namespace PhpSieveManager\Filters\Actions;
 
-class FileIntoFilterAction implements FilterAction
+class FileIntoFilterAction extends BaseSieveAction
 {
-    private $mailbox;
-
     public $require = ['fileinto'];
 
-    /**
-     * @param string $mailbox - The mailbox to file the message into
-     */
-    public function __construct($mailbox) {
-        $this->mailbox = $mailbox;
+    protected function getRequiredParams()
+    {
+        return ['mailbox'];
+    }
+
+    protected function getParamTypes() {
+        return ['mailbox' => 'string'];
     }
 
     /**
      * @return string
      */
     public function parse() {
-        return "fileinto \"{$this->mailbox}\";\n";
+        return "fileinto \"{$this->params['mailbox']}\";\n";
     }
 }

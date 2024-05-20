@@ -2,21 +2,21 @@
 
 namespace PhpSieveManager\Filters\Actions;
 
-class RedirectFilterAction implements FilterAction
+class RedirectFilterAction extends BaseSieveAction
 {
-    private $address;
+    protected function getRequiredParams()
+    {
+        return ['address'];
+    }
 
-    /**
-     * @param string $address - The address to redirect the message to
-     */
-    public function __construct($address) {
-        $this->address = $address;
+    protected function getParamTypes() {
+        return ['address' => 'string'];
     }
 
     /**
      * @return string
      */
     public function parse() {
-        return "redirect \"{$this->address}\";\n";
+        return "redirect \"{$this->params['address']}\";\n";
     }
 }

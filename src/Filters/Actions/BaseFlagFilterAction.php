@@ -2,37 +2,34 @@
 
 namespace PhpSieveManager\Filters\Actions;
 
-abstract class BaseFlagFilterAction implements FilterAction
+abstract class BaseFlagFilterAction extends BaseSieveAction
 {
     public $require = ['imap4flags'];
 
-    private $variableName;
-    private $listOfFlags;
-
-    /**
-     * @param array $listOfFlags - List of flags
-     * @param string $variableName - Variable name
-     */
-    public function __construct($listOfFlags, $variableName = null) {
-        $this->listOfFlags = $listOfFlags;
-        $this->variableName = $variableName;
-        if ($variableName) {
-            $this->require[] = 'variables';
-        }
+    public function getRequiredParams()
+    {
+        return ['list-of-flags'];
     }
 
-    abstract public function getScriptName();
+    protected function getParamTypes() {
+        return [
+            'variablename' => 'string',
+            'list-of-flags' => 'string-list'
+        ];
+    }
 
     /**
      * @return string
      */
     public function parse() {
         $script = $this->getScriptName();
-        if ($this->variableName) {
-            $script .= "\"{$this->variableName}\"";
+        if (!empty($this->params['variablename'])) {
+            $script .= "\"{$this->params['variablename']}\"";
         }
-        $script .= " [" . implode(', ', array_map(function($flag) { return "\"$flag\""; }, $this->listOfFlags)) . "];\n";
+        $script .= " [" . implode(', ', array_map(function($flag) { return "\"$flag\""; }, $this->params['list-of-flags'])) . "];\n";
 
         return $script;
     }
+
+    abstract public function getScriptName();
 }

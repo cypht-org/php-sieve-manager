@@ -5,23 +5,21 @@ namespace PhpSieveManager\Filters\Actions;
 /**
  * Please refer to https://www.rfc-editor.org/rfc/rfc5703.html#page-11
  */
-class ExtractTextFilterAction implements FilterAction
+class ExtractTextFilterAction extends BaseSieveAction
 {
-    private $modifier;
-    private $first;
-    private $varName;
-
     public $require = ['extracttext'];
 
-    /**
-     * @param string $varName - Variable name to store extracted text
-     * @param string|null $modifier - Modifier for extraction
-     * @param int|null $first - Number of first characters to extract
-     */
-    public function __construct($varName, $modifier = null, $first = null) {
-        $this->modifier = $modifier;
-        $this->first = $first;
-        $this->varName = $varName;
+    protected function getRequiredParams()
+    {
+        return ['varname'];
+    }
+
+    protected function getParamTypes() {
+        return [
+            'modifier' => 'string',
+            'first' => 'int',
+            'varname' => 'string'
+        ];
     }
 
     /**
@@ -29,13 +27,13 @@ class ExtractTextFilterAction implements FilterAction
      */
     public function parse() {
         $script = "extracttext";
-        if ($this->modifier) {
-            $script .= " {$this->modifier}";
+        if (!empty($this->params['modifier'])) {
+            $script .= " {$this->params['modifier']}";
         }
-        if ($this->first) {
-            $script .= " :first {$this->first}";
+        if (!empty($this->params['first'])) {
+            $script .= " :first {$this->params['first']}";
         }
-        $script .= " \"{$this->varName}\";\n";
+        $script .= " \"{$this->params['varName']}\";\n";
         return $script;
     }
 }
