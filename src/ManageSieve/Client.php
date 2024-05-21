@@ -744,4 +744,20 @@ class Client implements SieveClient
         }
         return false;
     }
+
+    /**
+     * Creates a copy of another script
+     *
+     * @param string $oldName The old Script name
+     * @param string $newName The new Script name
+     *
+     * @return boolean
+     */
+    public function copyScript($name, $copy)
+    {
+        if ($content = $this->getScript($copy)) {
+            return $this->putScript($name, $content);
+        }
+        return false;
+    }
 }
