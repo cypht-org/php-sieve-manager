@@ -2,30 +2,30 @@
 
 namespace PhpSieveManager\Filters\Actions;
 
-use PhpSieveManager\Exceptions\FilterActionParamException;
-
 /**
  * Please refer to https://www.rfc-editor.org/rfc/rfc5703.html#section-6
  */
-class EncloseFilterAction implements FilterAction
+class EncloseFilterAction extends BaseSieveAction
 {
-    private $params;
+    public $require = ['enclose'];
 
-    /**
-     * @param array $params
-     * @throws FilterActionParamException
-     */
-    public function __construct(array $params = []) {
-        if (count($params) != 1) {
-            throw new FilterActionParamException("EncloseFilterAction expect one parameters");
-        }
-        $this->params = $params;
+    protected function getRequiredParams()
+    {
+        return array_keys($this->getParamTypes());
+    }
+
+    protected function getParamTypes() {
+        return [
+            'subject' => 'string',
+            'headers' => 'string-list',
+            'content' => 'string'
+        ];
     }
 
     /**
      * @return string
      */
     public function parse() {
-        return 'enclose "'.$this->params[0].'";'."\n";
+        return "enclose :subject \"{$this->subject}\" :headers [\"" . implode('", "', $this->headers) . "\"] \"{$this->content}\";\n";
     }
 }

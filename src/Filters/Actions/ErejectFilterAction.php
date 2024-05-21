@@ -2,10 +2,10 @@
 
 namespace PhpSieveManager\Filters\Actions;
 
-class RejectFilterAction extends BaseRejectFilterAction
+class ErejectFilterAction extends BaseRejectFilterAction
 {
     protected function getType()
     {
-        return 'reject';
+        return 'ereject';
     }
 }

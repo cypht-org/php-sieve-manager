@@ -2,30 +2,46 @@
 
 namespace PhpSieveManager\Filters\Actions;
 
-use PhpSieveManager\Exceptions\FilterActionParamException;
-
 /**
  * Please refer to https://datatracker.ietf.org/doc/rfc5435/
  */
-class NotifyFilterAction implements FilterAction
+class NotifyFilterAction extends BaseSieveAction
 {
-    private $params;
+    public $require = ['enotify'];
 
-    /**
-     * @param array $params
-     * @throws FilterActionParamException
-     */
-    public function __construct(array $params = []) {
-        if (count($params) != 3) {
-            throw new FilterActionParamException("NotifyFilterAction expect three parameters");
-        }
-        $this->params = $params;
+    protected function getRequiredParams()
+    {
+        return ['method'];
+    }
+
+    protected function getParamTypes() {
+        return [
+            'from' => 'string',
+            'importance' => 'int',
+            'options' => 'string-list',
+            'message' => 'string',
+            'method' => 'string',
+        ];
     }
 
     /**
      * @return string
      */
     public function parse() {
-        return 'notify :importance "'.$this->params[0].'" :text "'.$this->params[1].'" "'.$this->params[2].'";'."\n";
+        $script = "notify";
+        if (!empty($this->params['from'])) {
+            $script .= " :from \"{$this->params['from']}\"";
+        }
+        if (!empty($this->params['importance'])) {
+            $script .= " :importance \"{$this->params['importance']}\"";
+        }
+        if (!empty($this->params['options'])) {
+            $script .= " :options [\"" . implode('", "', $this->params['options']) . "\"]";
+        }
+        if (!empty($this->params['message'])) {
+            $script .= " :message \"{$this->params['message']}\"";
+        }
+        $script .= " \"{$this->params['method']}\";\n";
+        return $script;
     }
 }

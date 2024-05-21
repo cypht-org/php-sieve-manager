@@ -2,17 +2,22 @@
 
 namespace PhpSieveManager\Filters\Actions;
 
-class KeepFilterAction implements FilterAction
+class KeepFilterAction extends BaseSieveAction
 {
-    /**
-     * @param array $params
-     */
-    public function __construct(array $params = []) {}
-
     /**
      * @return string
      */
     public function parse() {
-        return "keep;"."\n";
+        return "keep;\n";
+    }
+
+    public function getRequiredParams()
+    {
+        return [];
+    }
+
+    public function getParamTypes()
+    {
+        return [];
     }
 }

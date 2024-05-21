@@ -2,30 +2,54 @@
 
 namespace PhpSieveManager\Filters\Actions;
 
-use PhpSieveManager\Exceptions\FilterActionParamException;
-
-class VacationFilterAction implements FilterAction
+class VacationFilterAction extends BaseSieveAction
 {
-    private $params;
+    public $require = ['vacation'];
 
-    /**
-     * @param array $params
-     * @throws FilterActionParamException
-     */
-    public function __construct(array $params = []) {
-        if (count($params) < 1 || count($params) > 2) {
-            throw new FilterActionParamException("VacationFilterAction at least one parameter");
-        }
-        $this->params = $params;
+    protected function getParamTypes() {
+        return [
+            'days' => 'int',
+            'seconds' => 'int',
+            'subject' => 'string',
+            'from' => 'string',
+            'addresses' => 'string-list',
+            'mime' => 'bool',
+            'handle' => 'string',
+            'reason' => 'string'
+        ];
+    }
+
+    protected function getRequiredParams() {
+        return ['reason'];
     }
 
     /**
      * @return string
      */
     public function parse() {
-        if (count($this->params) == 2) {
-            return 'vacation :subject "' . $this->params[0] . '" "' . $this->params[1] . '";';
+        $script = "vacation";
+        if (!empty($this->params['seconds'])) {
+            $script .= " :seconds {$this->params['seconds']}";
+            $this->require[] = 'vacation-seconds';
+        } elseif (!empty($this->params['days'])) {
+            $script .= " :days {$this->params['days']}";
         }
-        return 'vacation "' . $this->params[0] . '";';
+        if (!empty($this->params['subject'])) {
+            $script .= " :subject \"{$this->params['subject']}\"";
+        }
+        if (!empty($this->params['from'])) {
+            $script .= " :from \"{$this->params['from']}\"";
+        }
+        if (!empty($this->params['addresses'])) {
+            $script .= " :addresses [\"" . implode('", "', $this->params['addresses']) . "\"]";
+        }
+        if (!empty($this->params['mime'])) {
+            $script .= " :mime {$this->params['mime']}";
+        }
+        if (!empty($this->params['handle'])) {
+            $script .= " :handle \"{$this->params['handle']}\"";
+        }
+        $script .= " \"{$this->params['reason']}\";\n";
+        return $script;
     }
 }

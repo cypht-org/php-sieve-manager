@@ -2,30 +2,35 @@
 
 namespace PhpSieveManager\Filters\Actions;
 
-use PhpSieveManager\Exceptions\FilterActionParamException;
-
 /**
  * Please refer to https://datatracker.ietf.org/doc/html/rfc5293#section-4
  */
-class AddHeaderFilterAction implements FilterAction
+class AddHeaderFilterAction extends BaseSieveAction
 {
-    private $params;
+    public $require = ['editheader'];
 
-    /**
-     * @param array $params
-     * @throws FilterActionParamException
-     */
-    public function __construct(array $params = []) {
-        if (count($params) != 2) {
-            throw new FilterActionParamException("AddHeaderFilterAction expect two parameters");
-        }
-        $this->params = $params;
+    public function getRequiredParams()
+    {
+        return ['field-name', 'value'];
+    }
+
+    protected function getParamTypes() {
+        return [
+            'last' => 'bool',
+            'field-name' => 'string',
+            'value' => 'string'
+        ];
     }
 
     /**
      * @return string
      */
     public function parse() {
-        return 'addheader "'.$this->params[0].'" "'.$this->params[1].'";'."\n";
+        $script = "addheader";
+        if (!empty($this->params['last'])) {
+            $script .= " :last";
+        }
+        $script .= " \"{$this->params['field-name']}\" \"{$this->params['value']}\";\n";
+        return $script;
     }
 }

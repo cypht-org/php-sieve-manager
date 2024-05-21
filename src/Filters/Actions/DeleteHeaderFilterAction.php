@@ -2,30 +2,51 @@
 
 namespace PhpSieveManager\Filters\Actions;
 
-use PhpSieveManager\Exceptions\FilterActionParamException;
-
 /**
  * Please refer to https://datatracker.ietf.org/doc/html/rfc5293#section-5
  */
-class DeleteHeaderFilterAction implements FilterAction
+class DeleteHeaderFilterAction extends BaseSieveAction
 {
-    private $params;
+    public $require = ['editheader'];
 
-    /**
-     * @param array $params
-     * @throws FilterActionParamException
-     */
-    public function __construct(array $params = []) {
-        if (count($params) != 1) {
-            throw new FilterActionParamException("DeleteHeaderFilterAction expect one parameters");
-        }
-        $this->params = $params;
+    protected function getRequiredParams()
+    {
+        return ['field-name'];
+    }
+
+    protected function getParamTypes() {
+        return [
+            'index' => 'bool',
+            'last' => 'bool',
+            'comparator' => 'string',
+            'match-type' => 'string',
+            'field-name' => 'string',
+            'value-patterns' => 'string-list'
+        ];
     }
 
     /**
      * @return string
      */
     public function parse() {
-        return 'deleteheader "'.$this->params[0].'";'."\n";
+        $script = "deleteheader";
+        if (!empty($this->params['index'])) {
+            $script .= " :index {$this->params['index']}";
+            if (!empty($this->params['last'])) {
+                $script .= " :last";
+            }
+        }
+        if (!empty($this->params['comparator'])) {
+            $script .= " {$this->params['comparator']}";
+        }
+        if (!empty($this->params['match-type'])) {
+            $script .= " {$this->params['match-type']}";
+        }
+        $script .= " \"{$this->params['field-name']}\"";
+        if (!empty($this->params['value-patterns'])) {
+            $script .= " [\"" . implode('", "', $this->params['value-patterns']) . "\"]";
+        }
+        $script .= ";\n";
+        return $script;
     }
 }

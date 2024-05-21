@@ -2,30 +2,30 @@
 
 namespace PhpSieveManager\Filters\Actions;
 
-use PhpSieveManager\Exceptions\FilterActionParamException;
-
 /**
  * Please refer to https://www.rfc-editor.org/rfc/rfc6558.html
  */
-class ConvertFilterAction implements FilterAction
+class ConvertFilterAction extends BaseSieveAction
 {
-    private $params;
+    public $require = ['convert'];
 
-    /**
-     * @param array $params
-     * @throws FilterActionParamException
-     */
-    public function __construct(array $params = []) {
-        if (count($params) != 3) {
-            throw new FilterActionParamException("ConvertFilterAction expect three parameters");
-        }
-        $this->params = $params;
+    protected function getRequiredParams()
+    {
+        return array_keys($this->getParamTypes());
+    }
+
+    protected function getParamTypes() {
+        return [
+            'quoted-from-media-type' => 'string',
+            'quoted-to-media-type' => 'string',
+            'transcoding-params' => 'string-list'
+        ];
     }
 
     /**
      * @return string
      */
     public function parse() {
-        return 'convert "'.$this->params[0].'" "'.$this->params[1].'" ["'.implode('","', $this->params[2]).'"];'."\n";
+        return "convert \"{$this->params['quoted-from-media-type']}\" \"{$this->params['quoted-to-media-type']}\" [" . implode(', ', array_map(function($param) { return "\"$param\""; }, $this->params['transcoding-params'])) . "];\n";
     }
 }

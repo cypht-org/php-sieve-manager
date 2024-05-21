@@ -2,27 +2,23 @@
 
 namespace PhpSieveManager\Filters\Actions;
 
-use PhpSieveManager\Exceptions\FilterActionParamException;
-
-class FileIntoFilterAction implements FilterAction
+class FileIntoFilterAction extends BaseSieveAction
 {
-    private $params;
+    public $require = ['fileinto'];
 
-    /**
-     * @param array $params
-     * @throws FilterActionParamException
-     */
-    public function __construct(array $params = []) {
-        if (count($params) != 1) {
-            throw new FilterActionParamException("FileIntoFilterAction expect one parameter");
-        }
-        $this->params = $params;
+    protected function getRequiredParams()
+    {
+        return ['mailbox'];
+    }
+
+    protected function getParamTypes() {
+        return ['mailbox' => 'string'];
     }
 
     /**
      * @return string
      */
     public function parse() {
-        return 'fileinto "'.$this->params[0].'";'."\n";
+        return "fileinto \"{$this->params['mailbox']}\";\n";
     }
 }

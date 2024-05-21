@@ -2,17 +2,20 @@
 
 namespace PhpSieveManager\Filters\Actions;
 
-class DiscardFilterAction implements FilterAction
+class DiscardFilterAction extends BaseSieveAction
 {
-    /**
-     * @param array $params
-     */
-    public function __construct(array $params = []) {}
-
     /**
      * @return string
      */
     public function parse() {
-        return "discard;"."\n";
+        return "discard;\n";
+    }
+
+    public function getRequiredParams() {
+        return [];
+    }
+
+    protected function getParamTypes() {
+        return [];
     }
 }
