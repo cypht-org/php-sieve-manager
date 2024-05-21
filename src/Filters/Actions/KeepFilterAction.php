@@ -4,12 +4,7 @@ namespace PhpSieveManager\Filters\Actions;
 
 class KeepFilterAction extends BaseSieveAction
 {
-    /**
-     * @return string
-     */
-    public function parse() {
-        return "keep;\n";
-    }
+    public $require = [];
 
     public function getRequiredParams()
     {
@@ -18,6 +13,18 @@ class KeepFilterAction extends BaseSieveAction
 
     public function getParamTypes()
     {
-        return [];
+        return ['flags' => 'string-list'];
+    }
+
+    /**
+     * @return string
+     */
+    public function parse() {
+        $flags = '';
+        if (!empty($this->params['flags'])) {
+            $this->require[] = 'imap4flags';
+            $flags = " :flags \"" . implode('", "', $this->params['flags']) . "\"";
+        }
+        return "keep{$flags};\n";
     }
 }

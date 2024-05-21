@@ -20,6 +20,7 @@ class NotifyFilterAction extends BaseSieveAction
             'importance' => 'int',
             'options' => 'string-list',
             'message' => 'string',
+            'fcc' => 'string',
             'method' => 'string',
         ];
     }
@@ -37,6 +38,10 @@ class NotifyFilterAction extends BaseSieveAction
         }
         if (!empty($this->params['options'])) {
             $script .= " :options [\"" . implode('", "', $this->params['options']) . "\"]";
+        }
+        if (!empty($this->params['fcc'])) {
+            $this->require[] = 'fcc';
+            $script .= " :fcc \"{$this->params['fcc']}\"";
         }
         if (!empty($this->params['message'])) {
             $script .= " :message \"{$this->params['message']}\"";

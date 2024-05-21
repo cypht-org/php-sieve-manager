@@ -33,7 +33,7 @@ class ExtractTextFilterAction extends BaseSieveAction
         if (!empty($this->params['first'])) {
             $script .= " :first {$this->params['first']}";
         }
-        $script .= " \"{$this->params['varName']}\";\n";
+        $script .= " \"{$this->params['varname']}\";\n";
         return $script;
     }
 }

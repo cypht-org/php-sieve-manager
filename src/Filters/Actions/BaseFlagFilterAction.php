@@ -8,13 +8,13 @@ abstract class BaseFlagFilterAction extends BaseSieveAction
 
     public function getRequiredParams()
     {
-        return ['list-of-flags'];
+        return ['flags'];
     }
 
     protected function getParamTypes() {
         return [
             'variablename' => 'string',
-            'list-of-flags' => 'string-list'
+            'flags' => 'string-list'
         ];
     }
 
@@ -26,7 +26,7 @@ abstract class BaseFlagFilterAction extends BaseSieveAction
         if (!empty($this->params['variablename'])) {
             $script .= "\"{$this->params['variablename']}\"";
         }
-        $script .= " [" . implode(', ', array_map(function($flag) { return "\"$flag\""; }, $this->params['list-of-flags'])) . "];\n";
+        $script .= " [" . implode(', ', array_map(function($flag) { return "\"$flag\""; }, $this->params['flags'])) . "];\n";
 
         return $script;
     }
