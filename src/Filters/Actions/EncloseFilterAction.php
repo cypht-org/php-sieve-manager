@@ -26,6 +26,6 @@ class EncloseFilterAction extends BaseSieveAction
      * @return string
      */
     public function parse() {
-        return "enclose :subject \"{$this->subject}\" :headers [\"" . implode('", "', $this->headers) . "\"] \"{$this->content}\";\n";
+        return "enclose :subject \"{$this->params['subject']}\" :headers [\"" . implode('", "', $this->params['headers']) . "\"] \"{$this->params['content']}\";\n";
     }
 }
