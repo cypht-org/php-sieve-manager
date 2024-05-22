@@ -1,6 +1,6 @@
 # php-sieve-manager
 
-A modern (started in 2022) PHP library for the ManageSieve protocol (RFC5804) to create/edit Sieve scripts (RFC5228). Used by [Cypht Webmail](https://cypht.org) and available to all PHP projects via [https://packagist.org/packages/henrique-borba/php-sieve-manager](https://packagist.org/packages/henrique-borba/php-sieve-manager)
+A modern (started in 2022) PHP library for the ManageSieve protocol (RFC5804) to create/edit Sieve scripts (RFC5228). Used by [Cypht Webmail](https://github.com/cypht-org/cypht) and available to all PHP projects via [https://packagist.org/packages/henrique-borba/php-sieve-manager](https://packagist.org/packages/henrique-borba/php-sieve-manager)
 
 [Tiki Wiki CMS Groupware bundles Cypht webmail](https://doc.tiki.org/Cypht) and [extends filters beyond what is possible via the Sieve protocol](https://doc.tiki.org/Email-filters).
 
