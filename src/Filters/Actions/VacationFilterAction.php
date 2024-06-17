@@ -2,7 +2,7 @@
 
 namespace PhpSieveManager\Filters\Actions;
 
-class VacationFilterAction extends BaseSieveAction
+class VacationFilterAction extends BaseFilterAction
 {
     public $require = ['vacation'];
 

@@ -2,7 +2,7 @@
 
 namespace PhpSieveManager\Filters\Actions;
 
-class RedirectFilterAction extends BaseSieveAction
+class RedirectFilterAction extends BaseFilterAction
 {
     public $require = [];
 

@@ -5,7 +5,7 @@ namespace PhpSieveManager\Filters\Actions;
 /**
  * Please refer to https://datatracker.ietf.org/doc/html/rfc5293#section-4
  */
-class AddHeaderFilterAction extends BaseSieveAction
+class AddHeaderFilterAction extends BaseFilterAction
 {
     public $require = ['editheader'];
 

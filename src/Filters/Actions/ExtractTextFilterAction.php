@@ -5,7 +5,7 @@ namespace PhpSieveManager\Filters\Actions;
 /**
  * Please refer to https://www.rfc-editor.org/rfc/rfc5703.html#page-11
  */
-class ExtractTextFilterAction extends BaseSieveAction
+class ExtractTextFilterAction extends BaseFilterAction
 {
     public $require = ['extracttext'];
 

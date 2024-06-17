@@ -2,7 +2,7 @@
 
 namespace PhpSieveManager\Filters\Actions;
 
-class Replace extends BaseSieveAction
+class ReplaceFilterAction extends BaseFilterAction
 {
     public $require = ['replace'];
 
