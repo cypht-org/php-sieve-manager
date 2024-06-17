@@ -2,7 +2,7 @@
 
 namespace PhpSieveManager\Filters\Actions;
 
-abstract class BaseRejectFilterAction extends BaseSieveAction
+abstract class BaseRejectFilterAction extends BaseFilterAction
 {
     public $require = [];
 

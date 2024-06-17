@@ -2,7 +2,7 @@
 
 namespace PhpSieveManager\Filters\Actions;
 
-class FileIntoFilterAction extends BaseSieveAction
+class FileIntoFilterAction extends BaseFilterAction
 {
     public $require = ['fileinto'];
 

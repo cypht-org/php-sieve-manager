@@ -5,7 +5,7 @@ namespace PhpSieveManager\Filters\Actions;
 /**
  * Please refer to https://www.rfc-editor.org/rfc/rfc5229.html
  */
-class SetFilterAction extends BaseSieveAction
+class SetFilterAction extends BaseFilterAction
 {
     public $require = ['variables'];
 

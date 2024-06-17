@@ -2,7 +2,7 @@
 
 namespace PhpSieveManager\Filters\Actions;
 
-class DiscardFilterAction extends BaseSieveAction
+class DiscardFilterAction extends BaseFilterAction
 {
     /**
      * @return string

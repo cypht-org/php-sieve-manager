@@ -5,7 +5,7 @@ namespace PhpSieveManager\Filters\Actions;
 /**
  * Please refer to https://www.rfc-editor.org/rfc/rfc6558.html
  */
-class ConvertFilterAction extends BaseSieveAction
+class ConvertFilterAction extends BaseFilterAction
 {
     public $require = ['convert'];
 

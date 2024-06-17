@@ -4,7 +4,7 @@ namespace PhpSieveManager\Filters\Actions;
 
 use PhpSieveManager\Exceptions\FilterActionParamException;
 
-abstract class BaseSieveAction implements FilterAction {
+abstract class BaseFilterAction implements FilterAction {
     protected array $params;
 
     public function __construct(array $params = []) {
@@ -24,7 +24,7 @@ abstract class BaseSieveAction implements FilterAction {
     protected function validateTypes() {
         $paramTypes = $this->getParamTypes();
         foreach ($this->params as $key => $value) {
-            if (isset($paramTypes[$key]) && !$this->isValidType($key, $value)) {
+            if (isset($paramTypes[$key]) && !$this->isValidType($value, $paramTypes[$key])) {
                 throw new FilterActionParamException("Invalid type for parameter: $key. Expected " . $value);
             }
         }

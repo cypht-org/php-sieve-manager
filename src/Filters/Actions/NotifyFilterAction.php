@@ -5,7 +5,7 @@ namespace PhpSieveManager\Filters\Actions;
 /**
  * Please refer to https://datatracker.ietf.org/doc/rfc5435/
  */
-class NotifyFilterAction extends BaseSieveAction
+class NotifyFilterAction extends BaseFilterAction
 {
     public $require = ['enotify'];
 

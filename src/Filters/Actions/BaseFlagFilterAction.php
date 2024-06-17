@@ -2,7 +2,7 @@
 
 namespace PhpSieveManager\Filters\Actions;
 
-abstract class BaseFlagFilterAction extends BaseSieveAction
+abstract class BaseFlagFilterAction extends BaseFilterAction
 {
     public $require = ['imap4flags'];
 
