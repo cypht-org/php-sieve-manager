@@ -29,10 +29,8 @@ class RedirectFilterAction extends BaseFilterAction
             $this->require[] = 'copy';
             $script .= " :copy";
         }
-        if (isset($this->params['notify']) || isset($this->params['notify'])) {
-            $this->require[] = 'redirect-dsn';
-        }
         if (!empty($this->params['notify'])) {
+            $this->require[] = 'redirect-dsn';
             $script .= " :notify \"{$this->params['notify']}\"";
         }
         if (!empty($this->params['ret'])) {
