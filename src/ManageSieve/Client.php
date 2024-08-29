@@ -91,7 +91,7 @@ class Client implements SieveClient
 
             try {
                 $nval = \fread($this->sock, $this->readSize);
-                if ($nval === false) {
+                if ($nval === false || $nval === "") {
                     break;
                 }
                 $this->readBuffer .= $nval;
