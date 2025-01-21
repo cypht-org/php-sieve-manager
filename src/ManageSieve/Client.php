@@ -16,6 +16,7 @@ class Client implements SieveClient
 {
     const SUPPORTED_AUTH_MECHS = ["DIGEST-MD5", "PLAIN", "LOGIN", "EXTERNAL", "OAUTHBEARER", "XOAUTH2"];
     const KNOWN_CAPABILITIES = ["IMPLEMENTATION", "SASL", "SIEVE", "STARTTLS", "NOTIFY", "LANGUAGE", "VERSION"];
+    private static $connectionPool = [];
 
     private $readSize = 4096;
     private $readTimeout = 5;
@@ -596,6 +597,17 @@ class Client implements SieveClient
      * @throws SocketException|SieveException
      */
     public function connect($username, $password, $tls=false, $authz_id="", $auth_mechanism=null) {
+        $connectionKey = $this->getConnectionKey($username, $tls);
+        if (isset(self::$connectionPool[$connectionKey])) {
+            $connection = self::$connectionPool[$connectionKey];
+            if ($this->isConnectionValid($connection)) {
+                $this->socket = $connection;
+                return true;
+            } else {
+                unset(self::$connectionPool[$connectionKey]);
+            }
+        }
+
         $ctx = stream_context_create();
         stream_context_set_option($ctx, 'ssl', 'verify_peer_name', false);
         stream_context_set_option($ctx, 'ssl', 'verify_peer', false);
@@ -606,7 +618,7 @@ class Client implements SieveClient
         }
 
         $this->connected = true;
-
+        self::$connectionPool[$connectionKey] = $this->socket;
         if (!$this->getCapabilitiesFromServer()) {
             throw new SocketException("Failed to read capabilities from the server");
         }
@@ -615,6 +627,15 @@ class Client implements SieveClient
         }
         throw new SieveException("Error while trying to connect to ManageSieve");
     }
+
+    private function getConnectionKey($username, $tls) {
+        return md5($username . '|' . ($tls ? 'TLS' : 'PLAIN') . '|' . $this->addr . ':' . $this->port);
+    }
+
+    private function isConnectionValid($socket) {
+        return is_resource($socket) && !feof($socket);
+    }
+
 
     /**
      * @return void
