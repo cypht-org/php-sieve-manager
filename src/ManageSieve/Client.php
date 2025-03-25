@@ -601,7 +601,7 @@ class Client implements SieveClient
         if (isset(self::$connectionPool[$connectionKey])) {
             $connection = self::$connectionPool[$connectionKey];
             if ($this->isConnectionValid($connection)) {
-                $this->socket = $connection;
+                $this->sock = $connection;
                 return true;
             } else {
                 unset(self::$connectionPool[$connectionKey]);
@@ -618,7 +618,7 @@ class Client implements SieveClient
         }
 
         $this->connected = true;
-        self::$connectionPool[$connectionKey] = $this->socket;
+        self::$connectionPool[$connectionKey] = $this->sock;
         if (!$this->getCapabilitiesFromServer()) {
             throw new SocketException("Failed to read capabilities from the server");
         }
