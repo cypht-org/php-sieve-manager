@@ -6,6 +6,7 @@ use PhpSieveManager\Exceptions\ResponseException;
 use PhpSieveManager\Exceptions\LiteralException;
 use PhpSieveManager\Exceptions\SieveException;
 use PhpSieveManager\Exceptions\SocketException;
+use PhpSieveManager\ManageSieve\Interfaces\SieveCache;
 use PhpSieveManager\ManageSieve\Interfaces\SieveClient;
 use PhpSieveManager\Utils\StringUtils;
 
@@ -16,6 +17,7 @@ class Client implements SieveClient
 {
     const SUPPORTED_AUTH_MECHS = ["DIGEST-MD5", "PLAIN", "LOGIN", "EXTERNAL", "OAUTHBEARER", "XOAUTH2"];
     const KNOWN_CAPABILITIES = ["IMPLEMENTATION", "SASL", "SIEVE", "STARTTLS", "NOTIFY", "LANGUAGE", "VERSION"];
+    const TTL = 3600;
     private static $connectionPool = [];
 
     private $readSize = 4096;
@@ -31,6 +33,9 @@ class Client implements SieveClient
     private $authenticated = false;
     private $errorCode;
     private $connected = false;
+
+    private $cache = null;
+    private $cacheKeyPrefix = '';
 
     private $respCodeExpression;
     private $errorCodeExpression;
@@ -49,6 +54,12 @@ class Client implements SieveClient
         $this->port = $port;
         $this->debug = $debug;
         $this->initExpressions();
+    }
+
+    public function setCache(SieveCache $cache): void
+    {
+        $this->cache = $cache;
+        $this->cacheKeyPrefix = md5($this->addr . ':' . $this->port);
     }
 
     /**
@@ -466,6 +477,10 @@ class Client implements SieveClient
         $content = $this->prepareContent($content);
         $return_payload = $this->sendCommand("PUTSCRIPT", ['"'.$name.'"', $content]);
         if ($return_payload["code"] == "OK") {
+            if ($this->cache) {
+                $this->cache->delete($this->cacheKeyPrefix . ':script:' . $name);
+                $this->cache->delete($this->cacheKeyPrefix . ':list');
+            }
             return true;
         }
         return false;
@@ -482,8 +497,18 @@ class Client implements SieveClient
      */
     public function getScript(string $name)
     {
+        if ($this->cache) {
+            $cached = $this->cache->get($this->cacheKeyPrefix . ':script:' . $name);
+            if ($cached !== null) {
+                return $cached;
+            }
+        }
+
         $return_payload = $this->sendCommand("GETSCRIPT", ['"'.$name.'"'], true);
         if ($return_payload["code"] == "OK") {
+            if ($this->cache) {
+                $this->cache->set($this->cacheKeyPrefix . ':script:' . $name, $return_payload['response'], $this::TTL);
+            }
             return $return_payload['response'];
         }
         return false;
@@ -520,6 +545,10 @@ class Client implements SieveClient
     {
         $return_payload = $this->sendCommand("DELETESCRIPT", ['"'.$name.'"']);
         if ($return_payload["code"] == "OK") {
+            if ($this->cache) {
+                $this->cache->delete($this->cacheKeyPrefix . ':script:' . $name);
+                $this->cache->delete($this->cacheKeyPrefix . ':list');
+            }
             return true;
         }
         return false;
@@ -534,6 +563,13 @@ class Client implements SieveClient
      * @throws SocketException
      */
     public function listScripts() {
+        if ($this->cache) {
+            $cached = $this->cache->get($this->cacheKeyPrefix . ':list');
+            if ($cached !== null) {
+                return $cached;
+            }
+        }
+
         $return_payload = $this->sendCommand("LISTSCRIPTS", NULL, true);
         if ($return_payload["code"] == "OK") {
             $scripts = [];
@@ -541,6 +577,9 @@ class Client implements SieveClient
                 if (trim($script_name) != '') {
                     $scripts[] = str_replace('" ACTIV', '', substr($script_name, 1, -2));
                 }
+            }
+            if ($this->cache) {
+                $this->cache->set($this->cacheKeyPrefix . ':list', $scripts, $this::TTL);
             }
             return $scripts;
         }
@@ -761,6 +800,11 @@ class Client implements SieveClient
     {
         $return_payload = $this->sendCommand("RENAMESCRIPT", ['"'.$oldName.'"', '"'.$newName.'"',]);
         if ($return_payload["code"] == "OK") {
+            if ($this->cache) {
+                $this->cache->delete($this->cacheKeyPrefix . ':script:' . $oldName);
+                $this->cache->delete($this->cacheKeyPrefix . ':script:' . $newName);
+                $this->cache->delete($this->cacheKeyPrefix . ':list');
+            }
             return true;
         }
         return false;
