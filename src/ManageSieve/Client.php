@@ -193,6 +193,7 @@ class Client implements SieveClient
             list($nextLine, $_) = $this->getSingleLine();
             if (preg_match('/^\d+$/', trim($errorMessage)) && preg_match('/error:/i', $nextLine)) {
                 $this->errorMessage = $nextLine;
+                $this->readBlock($errorMessage);
             } else {
                 $this->errorMessage = $this->readBlock($errorMessage);
             }
