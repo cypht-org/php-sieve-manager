@@ -76,6 +76,9 @@ class Client implements SieveClient
 
     private function getSingleLine() {
         $pos = strpos($this->readBuffer, "\r\n");
+        if ($pos === false) {
+            throw new \RuntimeException("Incomplete line in buffer, waiting for more data.");
+        }
         $return = substr($this->readBuffer, 0, $pos);
         return [$return, $pos];
     }
@@ -103,10 +106,16 @@ class Client implements SieveClient
 
             try {
                 $nval = \fread($this->sock, $this->readSize);
+                $meta = stream_get_meta_data($this->sock);
+                if ($meta['timed_out']) {
+                    throw new SocketException("Connection timed out while reading from the server.");
+                }
                 if ($nval === false || $nval === "") {
                     break;
                 }
                 $this->readBuffer .= $nval;
+            } catch (SocketException $e) {
+                throw $e;
             } catch (\Exception $e) {
                 throw new SocketException("Failed to read data from the server.");
             }
@@ -656,6 +665,7 @@ class Client implements SieveClient
             throw new SocketException("Socket creation failed: " . $errorstr);
         }
 
+        stream_set_timeout($this->sock, $this->readTimeout);
         $this->connected = true;
         self::$connectionPool[$connectionKey] = $this->sock;
         if (!$this->getCapabilitiesFromServer()) {
