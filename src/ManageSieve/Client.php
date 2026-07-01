@@ -76,6 +76,9 @@ class Client implements SieveClient
 
     private function getSingleLine() {
         $pos = strpos($this->readBuffer, "\r\n");
+        if ($pos === false) {
+            throw new \RuntimeException("Incomplete line in buffer, waiting for more data.");
+        }
         $return = substr($this->readBuffer, 0, $pos);
         return [$return, $pos];
     }
